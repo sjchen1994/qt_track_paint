@@ -1,3 +1,2 @@
 # qt_track_paint
-# hello world!
-
+  This a visual tool to read data from txt and show a dynamic interface.
