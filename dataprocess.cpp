@@ -98,12 +98,12 @@ bool DataProcess::IncludeJudge(int i, QMap<QString,QVector<QPointF>> &new_map, Q
     bool isincluded = false;
     int t = 1;
     while(t < i - 1){
-        QVector<QPointF>::iterator it = (new_map.find(QString::number(t) + QString::number(t+1)).value()).begin();
-        for(;it != new_map.find(QString::number(t) + QString::number(t+1)).value().end(); it++){
+        QVector<QPointF>::iterator it = (new_map.find(QString::number(t) + QString::number(t + 1)).value()).begin();
+        for(;it != new_map.find(QString::number(t) + QString::number(t + 1)).value().end(); it++){
             if(qAbs(x_axis2world(compare_point.x()) - x_axis2world(it->x())) < 100 && qAbs(x_axis2world(compare_point.y()) - x_axis2world(it->y())) < 100){ //说明这段轨迹中  包含了待测点
-                new_map.find(QString::number(t) + QString::number(t+1)).value().clear();//清空轨迹点
-                update_stop_pointf.find(t+1).value().swap(update_stop_pointf.find(i).value()); //交换坐标集
-                update_all_stop_pointf.find(t+1).value().swap(update_all_stop_pointf.find(i).value());
+                new_map.find(QString::number(t) + QString::number(t + 1)).value().clear();//清空轨迹点
+                update_stop_pointf.find(t + 1).value().swap(update_stop_pointf.find(i).value()); //交换坐标集
+                update_all_stop_pointf.find(t + 1).value().swap(update_all_stop_pointf.find(i).value());
                 compare_point = update_stop_pointf.find(i).value().first();
                 isincluded = true;
                 change_id = t + 1;
@@ -184,12 +184,12 @@ void DataProcess::GetPoint(){
     //将坐标容器中的size存储起来  为judge里面的判断做准备
     QVector<QVector<QPointF>>::iterator g_it = g_pointf.begin();
     QVector<int>::iterator g_int_it = g_size.begin();
-    for(;g_it != g_pointf.end(); g_it++,g_int_it++){
+    for(; g_it != g_pointf.end(); g_it++, g_int_it++){
         if(g_int_it != g_size.end()){//更新容器大小指标
             *(g_int_it) = (*(g_it)).size();
         }
         else if(g_int_it == g_size.end()){
-            g_int_it = g_size.insert(g_int_it,(*g_it).size());
+            g_int_it = g_size.insert(g_int_it, (*g_it).size());
             new_pt_join = 1;
         }
     }
@@ -234,7 +234,7 @@ void DataProcess::MainLoop(){
     QVector<int>::iterator g_size_it = g_size.begin();
     QVector<QVector<double>>::iterator g_angle_it = g_angle.begin();
     QVector<double>::iterator angle_it;
-    for(;g_it != g_pointf.end(); g_it++, g_angle_it++){
+    for(; g_it != g_pointf.end(); g_it++, g_angle_it++){
         if(*g_size_it > *tmp_g_size_it){ //有新的坐标读入
             single_stop_label = 1;
             label = 1;  //说明有已存在的类型的坐标新的坐标输入
@@ -247,7 +247,7 @@ void DataProcess::MainLoop(){
                 angle_it++;
             }
 
-            for(;a != (*g_it).end(); a++,angle_it++){
+            for(; a != (*g_it).end(); a++, angle_it++){
                 //找出停止点坐标
                 /*if(angle_it + 1 != (*g_angle_it).end()){
                     if( qAbs(x_axis2world((a+1)->x()) - x_axis2world(a->x())) < 0.5 && qAbs(y_axis2world((a+1)->y()) - y_axis2world(a->y())) < 0.5 && qAbs((*(angle_it+1)) - (*angle_it)) <= 0.01 ){
@@ -304,17 +304,17 @@ double DataProcess::AnalyzeStopPoints(QVector<QPointF> ana_points){
     QVector<QPointF> tmpQV = ana_points;
     while(true){
         if(ana_points.size() <= 2){
-            tmp = (ana_points.back() - ana_points.front())/2 + ana_points.front();
+            tmp = (ana_points.back() - ana_points.front()) / 2 + ana_points.front();
             //ana_points.clear();
             //ana_points.push_back(tmp);
             double sum = 0;
             for(auto it = tmpQV.begin(); it != tmpQV.end(); it++){
-                sum += qPow((tmp.x() - it->x()),2) + qPow((tmp.y() - it->y()),2);
+                sum += qPow((tmp.x() - it->x()), 2) + qPow((tmp.y() - it->y()), 2);
             }
-            return sum/tmpQV.size();
+            return sum / tmpQV.size();
         }
         else{
-           tmp = (ana_points.back() - ana_points.front())/2 + ana_points.front();
+           tmp = (ana_points.back() - ana_points.front()) / 2 + ana_points.front();
            ana_points.pop_back();
            ana_points.pop_front();
            ana_points.push_back(tmp);
@@ -327,7 +327,7 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
     //先排序
     QPointfSort(ana_points);
     double sum = 0;
-    int size = ana_points.size()/20;
+    int size = ana_points.size() / 20;
     QPointF ave_p1;
     QPointF ave_p2;
 
@@ -337,10 +337,10 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
     }
     ave_p1 = ave_p1/size;
     auto iter = ana_points.rbegin();
-    for(int i = 0 ; i < size; i++,iter++){
+    for(int i = 0; i < size; i++, iter++){
         ave_p2 += *iter;
     }
-    ave_p2 = ave_p2/size;
+    ave_p2 = ave_p2 / size;
 
     //删除前5%和后5%的点
     for(int i = 0 ; i < size; i++){
@@ -352,17 +352,17 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
 
     for(QPointF point : ana_points){
         if(ave_p1.x() == ave_p2.x()){
-            sum += qPow(point.x() - ave_p1.x(),2);
+            sum += qPow(point.x() - ave_p1.x(), 2);
         }
         else{
             double angle = QLineF(ave_p1,ave_p2).angleTo((QLineF(ave_p1,point)));
-            sum += qPow(sin(angle * pi / 180) * (QLineF(ave_p1,point).length()),2);
+            sum += qPow(sin(angle * pi / 180) * (QLineF(ave_p1,point).length()), 2);
         }
     }
     if(size == 0){
         return 0;
     }
-    return sum/ana_points.size();
+    return sum / ana_points.size();
 }
 
 //点集分析主函数
@@ -401,7 +401,7 @@ void DataProcess::AnalyzePoints(){
      * QVector<QMap<QString,QVector<QPointF>>> track_pointf : 所有轨迹坐标    示例: "12",(558.221,241.704)...  指  id为 1 2 之间的轨迹坐标集
     */
 
-    for(auto it = g_pointf.begin();it != g_pointf.end(); it++){//大循环，考虑不同model_id的坐标 抓出要分析的坐标
+    for(auto it = g_pointf.begin(); it != g_pointf.end(); it++){//大循环，考虑不同model_id的坐标 抓出要分析的坐标
         if(it->size() < 2){//如果坐标数目不够2个  则无需判断 退出
             continue;
         }
@@ -412,8 +412,8 @@ void DataProcess::AnalyzePoints(){
             if(   (qAbs(x_axis2world(last->x()) - x_axis2world(first->x())) < 1.5) &&   (qAbs(y_axis2world(last->y()) - y_axis2world(first->y())) < 1.5)     ){
                 stop_tmp_pointf2 = (*first);
                 push_all_stop_pointf.push_back(stop_tmp_pointf2);
-                uppush_stop_pointf.insert(1,push_all_stop_pointf);
-                uppush_all_stop_pointf.insert(1,push_all_stop_pointf);
+                uppush_stop_pointf.insert(1, push_all_stop_pointf);
+                uppush_all_stop_pointf.insert(1, push_all_stop_pointf);
                 first++;
                 last++;
                 break;
@@ -434,7 +434,7 @@ void DataProcess::AnalyzePoints(){
                     }
                 }
                 if(point_near == 0){
-                    edge_pointf.insert(QChar(97 + edge_pointf.size()), *first);
+                    edge_pointf.insert(QChar(97 + edge_pointf.size()), *first); //97:字母'a'
                     edge_pointf.insert(QChar(97 + edge_pointf.size()), *last);
                 }
                point_near = 0;
