@@ -181,9 +181,9 @@ void tracking::on_TrackAnalyze_triggered()
      * 4:得到停止点的平均点
     */
     //1
-    auto ana_it = dp.last_stop_pointf.begin();
+    auto ana_it = dp.mouse_pos_stop_pointf.begin();
     int current_rowcount;
-    for(; ana_it != dp.last_stop_pointf.end(); ana_it++){
+    for(; ana_it != dp.mouse_pos_stop_pointf.end(); ana_it++){
         for(int ana_id = 1; ana_it->find(ana_id) != ana_it->end(); ana_id++){
             current_rowcount = ui->stop_stat_view1->rowCount();
             ui->stop_stat_view1->setRowCount(current_rowcount+1);
@@ -258,7 +258,7 @@ void tracking::on_TrackAnalyze_triggered()
     this->repaint();
     dp.stop_pointf.clear();
     dp.track_pointf.clear();
-    dp.last_stop_pointf.clear();
+    dp.mouse_pos_stop_pointf.clear();
     dp.all_stop_pointf.clear();
     ui->analyze_button->setEnabled(false);
 }
@@ -289,7 +289,7 @@ void tracking::on_TrackConnect_triggered()
         //距离小于300的坐标才会被连接（如果车从一边离开视野，又从另一边进入视野，这临界的两个点是不应该相连的）（300数值可调，根据读取坐标速度）
         for(;it2 != it->end(); it1++, it2++){
             if( qAbs( dp.X_Axis2World(it1->x()) - dp.X_Axis2World(it2->x()) ) < 300 && qAbs( dp.Y_Axis2World(it1->y()) - dp.Y_Axis2World(it2->y()) ) < 300){
-                paintpoint.drawLine(*it1,*it2);
+                paintpoint.drawLine(*it1, *it2);
             }
         }
     }
@@ -313,9 +313,9 @@ void tracking::on_InterfaceClear_triggered()
     int width = 1811.25,height = 712.5;//坐标轴宽度，高度
     mypainter.drawRect(5,5,1250 * 1.5-10, 500 * 1.5-10);//外围矩形
     //y
-    mypainter.drawLine(point0x,point0y-height,point0x,point0y);
+    mypainter.drawLine(point0x, point0y - height, point0x, point0y);
     //x
-    mypainter.drawLine(pointx,pointy,pointx+width,pointy);
+    mypainter.drawLine(pointx, pointy, pointx + width, pointy);
 
     QPen pendegree;
     pendegree.setColor(Qt::black);
@@ -363,19 +363,19 @@ void tracking::on_rece_data_triggered()
 //--------------移动窗口事件--------------//
 void tracking::mousePressEvent(QMouseEvent *e)
 {
-    last = e->globalPos();
+    mouse_pos = e->globalPos();
 }
 void tracking::mouseMoveEvent(QMouseEvent *e)
 {
-    int dx = e->globalX() - last.x();
-    int dy = e->globalY() - last.y();
-    last = e->globalPos();
+    int dx = e->globalX() - mouse_pos.x();
+    int dy = e->globalY() - mouse_pos.y();
+    mouse_pos = e->globalPos();
     move(x()+dx, y()+dy);
 }
 void tracking::mouseReleaseEvent(QMouseEvent *e)
 {
-    int dx = e->globalX() - last.x();
-    int dy = e->globalY() - last.y();
+    int dx = e->globalX() - mouse_pos.x();
+    int dy = e->globalY() - mouse_pos.y();
     move(x()+dx, y()+dy);
 }
 

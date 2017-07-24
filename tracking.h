@@ -49,7 +49,7 @@ private slots:
     void on_rece_data_triggered();
 
 private:
-    QPoint last;
+    QPoint mouse_pos;
     rece_data rd;
     wechat_push wp;
     DataProcess dp;
@@ -57,11 +57,11 @@ private:
     QImage axis_image;
     Ui::tracking *ui;
 protected:
-    void mousePressEvent(QMouseEvent *e);
+    void mousePressEvent(QMouseEvent* e);
 
-    void mouseMoveEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent* e);
 
-    void mouseReleaseEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent* e);
 };
 
 #endif // TRACKING_H

@@ -9,7 +9,7 @@ rece_data::rece_data()
 //--------------线程主程序--------------//
 void rece_data::run(){
 
-    QStringList args;
+    //QStringList args;
     pro->startDetached("D:\\project\\test\\Debug\\test.exe");
     //QProcess::execute("D:\\project\\test\\Debug\\test.exe",args);
 }
