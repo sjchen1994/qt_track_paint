@@ -155,7 +155,7 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../build-tracking-Desktop_Qt_5_9_0_MSVC2013_64bit-Debug/clear1.png</normaloff>../build-tracking-Desktop_Qt_5_9_0_MSVC2013_64bit-Debug/clear1.png</iconset>
+      <normaloff>D:/project/qtproject/build-tracking-Desktop_Qt_5_9_0_MSVC2013_64bit-Debug/clear1.png</normaloff>D:/project/qtproject/build-tracking-Desktop_Qt_5_9_0_MSVC2013_64bit-Debug/clear1.png</iconset>
     </property>
     <property name="iconSize">
      <size>

@@ -57,7 +57,7 @@ tracking::tracking(QWidget *parent) :
     connect(ui->window_quit,             SIGNAL(released()),  ui->quit,              SLOT(trigger()));
     connect(ui->txt_clear_button,       SIGNAL(released()),  ui->txt_clear,       SLOT(trigger()));
 
-    connect(&dp, SIGNAL(send_data(QVector<QVector<QPointF>>)), this,SLOT(ReceiveData(QVector<QVector<QPointF>>)));
+    connect(&dp, SIGNAL(Senddata(QVector<QVector<QPointF>>)), this,SLOT(ReceiveData(QVector<QVector<QPointF>>)));
 }
 
 //--------------构造函数--------------//
@@ -111,12 +111,11 @@ void tracking::PaintPointf(const QVector<QVector<QPointF> > &tmp_points){
     QPainter paintpoint(&axis_image);
     QPen pen;
     pen.setWidth(2);
-    auto it = tmp_points.begin();
     int t = 0;
-    for(; it != tmp_points.end(); it++){
+    for(QVector<QPointF> spe_id_pointf : tmp_points){
         pen.setColor(v_color[t]);
         paintpoint.setPen(pen);
-        paintpoint.drawPoints(*it);
+        paintpoint.drawPoints(spe_id_pointf);
         t++;
         this->repaint();
     }
@@ -141,7 +140,7 @@ void tracking::MyDrawArrow(const QPointF& pt1, const QPointF& pt2, QPainter &p){
 }
 
 //--------------主线程SLOT函数--------------//
-void tracking::ReceiveData(const QVector<QVector<QPointF> > g_pointf){//从接受数据处理进程传送的数据
+void tracking::ReceiveData(const QVector<QVector<QPointF> > g_pointf){//接受数据处理进程传送的数据
     PaintPointf(g_pointf);
 }
 
@@ -157,7 +156,7 @@ void tracking::on_quit_triggered()
 {
     rd.ProTeminal();
     rd.quit();
-    rd.terminate();
+    //rd.terminate();
     dp.quit();
     dp.terminate();//停止数据处理线程
     this->close();
@@ -172,7 +171,8 @@ void tracking::on_WechatPush_triggered()
 //--------------数据分析按钮事件--------------//
 void tracking::on_TrackAnalyze_triggered()
 {
-    dp.AnalyzePoints();//利用返回类型来画图
+    //分析计算函数
+    dp.AnalyzePoints();
     //-----------------------分析点坐标集合  输出分析结果-------------------//
     /*  分析对象：
      * 1:QVector<QMap<int,QVector<QPointF>>> stop_pointf      : 所有到点坐标（形式：id-value）
@@ -195,7 +195,6 @@ void tracking::on_TrackAnalyze_triggered()
 
     //2
     for(auto ana_tra_it = dp.track_pointf.begin(); ana_tra_it != dp.track_pointf.end(); ana_tra_it++,ana_it++){
-
         for(auto it_tra = ana_tra_it->begin(); it_tra != ana_tra_it->end(); it_tra++){
             current_rowcount = ui->track_stat_view1->rowCount();
             ui->track_stat_view1->setRowCount(current_rowcount+1);
@@ -251,7 +250,7 @@ void tracking::on_TrackAnalyze_triggered()
             all_size = ana_all_it.value().size();
         }
         show_pointf = show_pointf / all_size;
-        ui->stop_stat_view1->setItem(insert_rowcount,2,new QTableWidgetItem(QString::number(dp.x_axis2world((show_pointf.x()))) + " , " + QString::number(dp.y_axis2world(show_pointf.y()))));
+        ui->stop_stat_view1->setItem(insert_rowcount,2,new QTableWidgetItem(QString::number(dp.X_Axis2World((show_pointf.x()))) + " , " + QString::number(dp.Y_Axis2World(show_pointf.y()))));
         ui->stop_stat_view1->setItem(insert_rowcount,3,new QTableWidgetItem(QString::number(ana_all_it.value().size())));
         insert_rowcount++;
         show_pointf = QPointF(0,0);
@@ -271,26 +270,25 @@ void tracking::on_TrackConnect_triggered()
     QPen pen;
     int t = 0;
     pen.setWidth(0.2);
-    QVector<QVector<QPointF>>::iterator it = dp.show_g_pointf.begin();
     QVector<QPointF>::iterator it1;
     QVector<QPointF>::iterator it2;
 
     //画的是show_g_pointf里的点，即假设点击过清空按钮以后，之后显示的轨迹不会包括之前清空过的
-    for(;it != dp.show_g_pointf.end(); it++){
+    for(auto it = dp.show_g_pointf.begin();it != dp.show_g_pointf.end(); it++){
 
         pen.setColor(v_color[t]);
         t++;
         paintpoint.setPen(pen);
-        it1 = (*it).begin();
-        if((*it).size() > 1){
+        it1 = it->begin();
+        if(it->size() > 1){
             it2 = it1 + 1;
         }
         else{
             continue;
         }
         //距离小于300的坐标才会被连接（如果车从一边离开视野，又从另一边进入视野，这临界的两个点是不应该相连的）（300数值可调，根据读取坐标速度）
-        for(;it2 != (*it).end();it1++,it2++){
-            if( qAbs( dp.x_axis2world(it1->x()) - dp.x_axis2world(it2->x()) ) < 300 && qAbs( dp.y_axis2world(it1->y()) - dp.y_axis2world(it2->y()) ) < 300){
+        for(;it2 != it->end(); it1++, it2++){
+            if( qAbs( dp.X_Axis2World(it1->x()) - dp.X_Axis2World(it2->x()) ) < 300 && qAbs( dp.Y_Axis2World(it1->y()) - dp.Y_Axis2World(it2->y()) ) < 300){
                 paintpoint.drawLine(*it1,*it2);
             }
         }
@@ -304,16 +302,16 @@ void tracking::on_InterfaceClear_triggered()
     dp.clear_pushed = 1;
     dp.ever_clear = 1;
     dp.data_clear = 1;
-    axis_image = QImage(1250*1.5,500*1.5,QImage::Format_RGB32);
-    illu_image = QImage(187.5,75,QImage::Format_RGB32);
-    QColor backColor = qRgb(255,255,255);
+    axis_image = QImage(1250 * 1.5, 500 * 1.5, QImage::Format_RGB32);
+    illu_image = QImage(187.5, 75, QImage::Format_RGB32);
+    QColor backColor = qRgb(255, 255, 255);
     axis_image.fill(backColor);
     illu_image.fill(backColor);
     QPainter mypainter(&axis_image);
     int point0x = 61, point0y = 727.5;//坐标轴原点
-    int pointx = 25.5,pointy = 79.77;
+    int pointx = 25.5, pointy = 79.77;
     int width = 1811.25,height = 712.5;//坐标轴宽度，高度
-    mypainter.drawRect(5,5,1250*1.5-10,500*1.5-10);//外围矩形
+    mypainter.drawRect(5,5,1250 * 1.5-10, 500 * 1.5-10);//外围矩形
     //y
     mypainter.drawLine(point0x,point0y-height,point0x,point0y);
     //x
@@ -324,14 +322,14 @@ void tracking::on_InterfaceClear_triggered()
     pendegree.setWidth(2);
     mypainter.setPen(pendegree);
     //x轴刻度
-    for(int i=0;i<30;i++){
-        mypainter.drawLine(pointx+(i+1)*width/30,pointy,pointx+(i+1)*width/30,pointy+4);
-        mypainter.drawText(pointx+(i+0.65)*width/30,pointy+13,QString::number(-100+(i+1)*170));
+    for(int i = 0; i < 30; i++){
+        mypainter.drawLine(pointx + (i + 1) * width / 30, pointy, pointx + (i + 1) * width / 30, pointy + 4);
+        mypainter.drawText(pointx+(i + 0.65) * width / 30, pointy + 13, QString::number(-100 + (i + 1) * 170));
     }
     //y轴刻度
-    for(int i=0;i<20;i++){
-        mypainter.drawLine(point0x,point0y-i*height/20,point0x+4,point0y-i*height/20);
-        mypainter.drawText(point0x-22,point0y-(i-0.15)*height/20,QString::number(2000-i*110));
+    for(int i = 0; i < 20; i++){
+        mypainter.drawLine(point0x, point0y - i * height / 20, point0x + 4, point0y - i * height / 20);
+        mypainter.drawText(point0x - 22, point0y - (i - 0.15) * height / 20, QString::number(2000 - i * 110));
     }
     ui->stop_stat_view1->setRowCount(0);
     ui->track_stat_view1->setRowCount(0);
@@ -345,12 +343,14 @@ void tracking::on_InterfaceClear_triggered()
 //--------------数据存储清除事件--------------//
 void tracking::on_txt_clear_triggered()
 {
+    this->on_InterfaceClear_triggered();
+    dp.g_pointf.clear();
     QFile file("D:\\project\\test\\debug\\track1.txt");
     file.open(QIODevice::WriteOnly);
     file.close();
     ui->txtclr_label->setText("清除成功");
     this->repaint();
-    dp.sleep(1000);
+    //dp.sleep(1000);
     ui->txtclr_label->setText("清空坐标");
 }
 

@@ -27,9 +27,9 @@ DataProcess::DataProcess()
 //--------------线程主程序--------------//
 void DataProcess::run(){
     this->GetPoint();
-    emit send_data(g_pointf);
+    emit Senddata(g_pointf);
     while(true){
-        this->sleep(50);
+        this->Sleep(50);
         this->MainLoop();
     }
 }
@@ -37,19 +37,19 @@ void DataProcess::run(){
 
 //--------------工具函数--------------//
 //坐标转换函数
-double DataProcess::x_axis2world(const double &tmp){
+double DataProcess::X_Axis2World(const double &tmp){
     return (tmp - 25.5) / kx - 100;
 }
 
-double DataProcess::y_axis2world(const double &tmp){
+double DataProcess::Y_Axis2World(const double &tmp){
     return (tmp - 15) / ky - 200;
 }
 
-double DataProcess::x_world2axis(const double &tmp){
+double DataProcess::X_World2Axis(const double &tmp){
     return (tmp + 100) * kx + 25.5;
 }
 
-double DataProcess::y_world2axis(const double &tmp){
+double DataProcess::Y_World2Axis(const double &tmp){
     return ky * (tmp + 200) + 15;
 }
 
@@ -93,14 +93,14 @@ bool DataProcess::NearEdgeJudge(const QPointF* judge_point){
 }
 
 //--------------功能函数--------------//
-//判断新的id的坐标点是否在已存在的轨迹上
-bool DataProcess::IncludeJudge(int i, QMap<QString,QVector<QPointF>> &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int,QVector<QPointF>> &update_all_stop_pointf, QPointF compare_point, int &change_id){
+//把新的id点和现有点进行正确的排序
+bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int,QVector<QPointF>> &update_all_stop_pointf, QPointF compare_point, int &change_id){
     bool isincluded = false;
     int t = 1;
     while(t < i - 1){
         QVector<QPointF>::iterator it = (new_map.find(QString::number(t) + QString::number(t + 1)).value()).begin();
         for(;it != new_map.find(QString::number(t) + QString::number(t + 1)).value().end(); it++){
-            if(qAbs(x_axis2world(compare_point.x()) - x_axis2world(it->x())) < 100 && qAbs(x_axis2world(compare_point.y()) - x_axis2world(it->y())) < 100){ //说明这段轨迹中  包含了待测点
+            if(qAbs(X_Axis2World(compare_point.x()) - X_Axis2World(it->x())) < 100 && qAbs(X_Axis2World(compare_point.y()) - X_Axis2World(it->y())) < 100){ //说明这段轨迹中  包含了待测点
                 new_map.find(QString::number(t) + QString::number(t + 1)).value().clear();//清空轨迹点
                 update_stop_pointf.find(t + 1).value().swap(update_stop_pointf.find(i).value()); //交换坐标集
                 update_all_stop_pointf.find(t + 1).value().swap(update_all_stop_pointf.find(i).value());
@@ -154,14 +154,14 @@ void DataProcess::GetPoint(){
                 for(;it != readline_data.end(); it++){
                     if(*it == ','){
                         tmp_value = data.toDouble();
-                        tmp_value = x_world2axis(tmp_value);
+                        tmp_value = X_World2Axis(tmp_value);
                         tmp_point.setX(tmp_value);
                         data.clear();
                         continue;
                     }
                     else if(*it == " "){
                         tmp_value = data.toDouble();
-                        tmp_value = y_world2axis(tmp_value);
+                        tmp_value = Y_World2Axis(tmp_value);
                         tmp_point.setY(tmp_value);
                         data.clear();
                     }
@@ -199,7 +199,7 @@ void DataProcess::GetPoint(){
 void DataProcess::MainLoop(){
     QVector<int> tmp_g_size = g_size;
 
-    int label = 0;
+    int ExPointInsertLabel = 0;
     int t = 0;
     //int is_stop_point = 0;
     this->GetPoint(); //获取最新的坐标信息
@@ -237,7 +237,7 @@ void DataProcess::MainLoop(){
     for(; g_it != g_pointf.end(); g_it++, g_angle_it++){
         if(*g_size_it > *tmp_g_size_it){ //有新的坐标读入
             single_stop_label = 1;
-            label = 1;  //说明有已存在的类型的坐标新的坐标输入
+            ExPointInsertLabel = 1;  //说明有已存在的类型的坐标新的坐标输入
             a = (*g_it).begin();
             angle_it = (*g_angle_it).begin();
             int tmp_g_size = *tmp_g_size_it;
@@ -250,7 +250,7 @@ void DataProcess::MainLoop(){
             for(; a != (*g_it).end(); a++, angle_it++){
                 //找出停止点坐标
                 /*if(angle_it + 1 != (*g_angle_it).end()){
-                    if( qAbs(x_axis2world((a+1)->x()) - x_axis2world(a->x())) < 0.5 && qAbs(y_axis2world((a+1)->y()) - y_axis2world(a->y())) < 0.5 && qAbs((*(angle_it+1)) - (*angle_it)) <= 0.01 ){
+                    if( qAbs(X_Axis2World((a+1)->x()) - X_Axis2World(a->x())) < 0.5 && qAbs(Y_Axis2World((a+1)->y()) - Y_Axis2World(a->y())) < 0.5 && qAbs((*(angle_it+1)) - (*angle_it)) <= 0.01 ){
                         is_stop_point = 1;
                     }
                 }
@@ -286,12 +286,12 @@ void DataProcess::MainLoop(){
             //将信息写入txt供python程序读取，python程序读取信息正确后，就会发消息到微信上
         }
     }
-    if(label == 0 && data_clear == 0 && ever_clear == 0){  //如果没有点击过按钮   show_g_pointf 和 g_pointf 是相同的
+    if(ExPointInsertLabel == 0 && data_clear == 0 && ever_clear == 0){  //如果没有点击过按钮   show_g_pointf 和 g_pointf 是相同的
         //new_s_pointf = s_pointf;
         show_g_pointf = g_pointf;
     }
-    if(label == 1){
-        emit send_data(show_g_pointf);
+    if(ExPointInsertLabel == 1){
+        emit Senddata(show_g_pointf);
     }
 
     //重绘停止点 防止被其他点覆盖
@@ -301,17 +301,17 @@ void DataProcess::MainLoop(){
 //获得停止点方差
 double DataProcess::AnalyzeStopPoints(QVector<QPointF> ana_points){
     QPointF tmp;
-    QVector<QPointF> tmpQV = ana_points;
+    QVector<QPointF> tmp_points = ana_points;
     while(true){
         if(ana_points.size() <= 2){
             tmp = (ana_points.back() - ana_points.front()) / 2 + ana_points.front();
             //ana_points.clear();
             //ana_points.push_back(tmp);
             double sum = 0;
-            for(auto it = tmpQV.begin(); it != tmpQV.end(); it++){
+            for(auto it = tmp_points.begin(); it != tmp_points.end(); it++){
                 sum += qPow((tmp.x() - it->x()), 2) + qPow((tmp.y() - it->y()), 2);
             }
-            return sum / tmpQV.size();
+            return sum / tmp_points.size();
         }
         else{
            tmp = (ana_points.back() - ana_points.front()) / 2 + ana_points.front();
@@ -409,7 +409,7 @@ void DataProcess::AnalyzePoints(){
         last = first + 1;
         now_id = 1;
         while(last != it->end()){  //先找出第一个停止点  并标记为1  存储在map中
-            if(   (qAbs(x_axis2world(last->x()) - x_axis2world(first->x())) < 1.5) &&   (qAbs(y_axis2world(last->y()) - y_axis2world(first->y())) < 1.5)     ){
+            if(   (qAbs(X_Axis2World(last->x()) - X_Axis2World(first->x())) < 1.5) &&   (qAbs(Y_Axis2World(last->y()) - Y_Axis2World(first->y())) < 1.5)     ){
                 stop_tmp_pointf2 = (*first);
                 push_all_stop_pointf.push_back(stop_tmp_pointf2);
                 uppush_stop_pointf.insert(1, push_all_stop_pointf);
@@ -427,7 +427,7 @@ void DataProcess::AnalyzePoints(){
             push_all_stop_pointf.clear();
             push_last_stop_pointf.clear();
             every_track_point.push_back(*first);//存储两个较远停止点之间的点数据
-            if((qAbs(x_axis2world(first->x()) - x_axis2world(last->x())) > 300 || qAbs(y_axis2world(first->y()) - y_axis2world(last->y())) > 300) && NearEdgeJudge(first) && NearEdgeJudge(last)){
+            if((qAbs(X_Axis2World(first->x()) - X_Axis2World(last->x())) > 300 || qAbs(Y_Axis2World(first->y()) - Y_Axis2World(last->y())) > 300) && NearEdgeJudge(first) && NearEdgeJudge(last)){
                 for(auto it = edge_pointf.begin(); it != edge_pointf.end(); it++){
                     if(GetDistanceOfPoints(&it.value(),first) < 100){
                         point_near = 1;
@@ -439,14 +439,14 @@ void DataProcess::AnalyzePoints(){
                 }
                point_near = 0;
             }
-            if(qAbs(x_axis2world(last->x()) - x_axis2world(first->x())) < 1.5 && qAbs(y_axis2world(last->y()) - y_axis2world(first->y())) < 1.5){//判断是否是停止点
+            if(qAbs(X_Axis2World(last->x()) - X_Axis2World(first->x())) < 1.5 && qAbs(Y_Axis2World(last->y()) - Y_Axis2World(first->y())) < 1.5){//判断是否是停止点
                 stop_tmp_pointf1 = stop_tmp_pointf2;
                 stop_tmp_pointf2 = (*first);
-                if(qAbs(x_axis2world(stop_tmp_pointf1.x()) - x_axis2world(stop_tmp_pointf2.x())) > 500 || qAbs(y_axis2world(stop_tmp_pointf1.y()) - y_axis2world(stop_tmp_pointf2.y())) > 500){//如果不是同一个id的点
+                if(qAbs(X_Axis2World(stop_tmp_pointf1.x()) - X_Axis2World(stop_tmp_pointf2.x())) > 500 || qAbs(Y_Axis2World(stop_tmp_pointf1.y()) - Y_Axis2World(stop_tmp_pointf2.y())) > 500){//如果不是同一个id的点
                     pointf_have_exist = 0;
 
                     for(i = 1; uppush_stop_pointf.find(i) != uppush_stop_pointf.end() ; i++){//遍历map中有无和当前同一id的点集合
-                        if(qAbs(x_axis2world((uppush_stop_pointf.find(i).value())[0].x()) - x_axis2world(stop_tmp_pointf2.x())) < 500 && qAbs(y_axis2world((uppush_stop_pointf.find(i).value())[0].y()) - y_axis2world(stop_tmp_pointf2.y())) < 500){//有，直接push
+                        if(qAbs(X_Axis2World((uppush_stop_pointf.find(i).value())[0].x()) - X_Axis2World(stop_tmp_pointf2.x())) < 500 && qAbs(Y_Axis2World((uppush_stop_pointf.find(i).value())[0].y()) - Y_Axis2World(stop_tmp_pointf2.y())) < 500){//有，直接push
 
                             if(uppush_last_stop_pointf.find(now_id) == uppush_last_stop_pointf.end()){
                                 push_last_stop_pointf.push_back(stop_tmp_pointf1);
@@ -471,7 +471,7 @@ void DataProcess::AnalyzePoints(){
                         if(next_id > max_id){//设置最大id
                             max_id = next_id;
                         }
-                        //if(qAbs(x_axis2world(stop_tmp_pointf1.x()) - x_axis2world(uppush_last_stop_pointf.find(now_id).value()[0].x()) ) < 300 && qAbs(y_axis2world(stop_tmp_pointf1.y()) - y_axis2world(uppush_last_stop_pointf.find(now_id).value()[0].y()) ) < 300){//确定要push的点是对的
+                        //if(qAbs(X_Axis2World(stop_tmp_pointf1.x()) - X_Axis2World(uppush_last_stop_pointf.find(now_id).value()[0].x()) ) < 300 && qAbs(Y_Axis2World(stop_tmp_pointf1.y()) - Y_Axis2World(uppush_last_stop_pointf.find(now_id).value()[0].y()) ) < 300){//确定要push的点是对的
                             push_last_stop_pointf.push_back(stop_tmp_pointf1);
                             uppush_last_stop_pointf.insert(now_id,push_last_stop_pointf);
                         //}
@@ -483,7 +483,7 @@ void DataProcess::AnalyzePoints(){
 
 
                         //--------------检验新id点的正确性--------------//
-                        if(IncludeJudge(next_id,push_track_pointf,uppush_stop_pointf, uppush_all_stop_pointf, stop_tmp_pointf2, now_id)){
+                        if(NewPointSort(next_id,push_track_pointf,uppush_stop_pointf, uppush_all_stop_pointf, stop_tmp_pointf2, now_id)){
                             every_track_point.clear();
                         }
                     }
