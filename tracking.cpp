@@ -10,7 +10,7 @@ tracking::tracking(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
-
+    this->setWindowIcon(QIcon("tracking.jpg"));
     //界面控件初始化
 
     ui->stop_stat_view1->setColumnCount(4);
@@ -148,7 +148,7 @@ void tracking::ReceiveData(const QVector<QVector<QPointF> > g_pointf){//接受�
 void tracking::on_ScreenShot_triggered()
 {
     QPixmap save_image = QPixmap::grabWidget(this);
-    save_image.save("11.png","png");
+    save_image.save("ScreenShot.png","png");
 }
 
 //--------------退出按钮事件--------------//
@@ -181,9 +181,9 @@ void tracking::on_TrackAnalyze_triggered()
      * 4:得到停止点的平均点
     */
     //1
-    auto ana_it = dp.mouse_pos_stop_pointf.begin();
+    auto ana_it = dp.last_stop_pointf.begin();
     int current_rowcount;
-    for(; ana_it != dp.mouse_pos_stop_pointf.end(); ana_it++){
+    for(; ana_it != dp.last_stop_pointf.end(); ana_it++){
         for(int ana_id = 1; ana_it->find(ana_id) != ana_it->end(); ana_id++){
             current_rowcount = ui->stop_stat_view1->rowCount();
             ui->stop_stat_view1->setRowCount(current_rowcount+1);
@@ -258,7 +258,7 @@ void tracking::on_TrackAnalyze_triggered()
     this->repaint();
     dp.stop_pointf.clear();
     dp.track_pointf.clear();
-    dp.mouse_pos_stop_pointf.clear();
+    dp.last_stop_pointf.clear();
     dp.all_stop_pointf.clear();
     ui->analyze_button->setEnabled(false);
 }
@@ -333,8 +333,8 @@ void tracking::on_InterfaceClear_triggered()
     }
     ui->stop_stat_view1->setRowCount(0);
     ui->track_stat_view1->setRowCount(0);
-    ui->stop_stat_view1->clear();
-    ui->track_stat_view1->clear();
+    ui->stop_stat_view1->clearContents();
+    ui->track_stat_view1->clearContents();
     this->repaint();
     ui->analyze_button->setEnabled(true);
 
@@ -370,12 +370,12 @@ void tracking::mouseMoveEvent(QMouseEvent *e)
     int dx = e->globalX() - mouse_pos.x();
     int dy = e->globalY() - mouse_pos.y();
     mouse_pos = e->globalPos();
-    move(x()+dx, y()+dy);
+    move(x() + dx, y() + dy);
 }
 void tracking::mouseReleaseEvent(QMouseEvent *e)
 {
     int dx = e->globalX() - mouse_pos.x();
     int dy = e->globalY() - mouse_pos.y();
-    move(x()+dx, y()+dy);
+    move(x() + dx, y() + dy);
 }
 
