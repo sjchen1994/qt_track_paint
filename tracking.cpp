@@ -155,9 +155,7 @@ void tracking::on_ScreenShot_triggered()
 void tracking::on_quit_triggered()
 {
     rd.ProTeminal();
-    rd.quit();
-    //rd.terminate();
-    dp.quit();
+    wp.ProTeminal();
     dp.terminate();//停止数据处理线程
     this->close();
 }
@@ -172,6 +170,9 @@ void tracking::on_WechatPush_triggered()
 void tracking::on_TrackAnalyze_triggered()
 {
     //分析计算函数
+    if(dp.g_pointf.first().empty()){
+        return;
+    }
     dp.AnalyzePoints();
     //-----------------------分析点坐标集合  输出分析结果-------------------//
     /*  分析对象：

@@ -2,14 +2,14 @@
 #define RECE_DATA_H
 #include <QThread>
 #include <QProcess>
-
+#include <QDebug>
+#include <QMessageBox>
 class rece_data : public QThread
 {
 public:
     rece_data();
     void ProTeminal();
     virtual void run();
-private:
     QProcess *pro;
 };
 
