@@ -82,6 +82,42 @@ void DataProcess::QPointfSort(QVector<QPointF> &vpf){
     }
 }
 
+//停止点map排序工具
+void DataProcess::MapPointSort(QMap<int, QVector<QPointF>>& sorting_points, int find_id){
+    while(find_id != sorting_points.lastKey()){
+        sorting_points.find(find_id).value().swap(sorting_points.last());
+        find_id++;
+    }
+}
+
+//轨迹map排序工具
+void DataProcess::MapTrackSort(QMap<QString, QVector<QPointF> > &sorting_track, QVector<QPointF> insert_points1, QVector<QPointF> insert_points2, int find_id){
+    sorting_track.erase(sorting_track.find(QString::number(find_id) + QString::number(find_id + 1))); //先把找到新的点的一段轨迹删除
+    int sort_id = find_id + 1;
+    //如果是41->51
+    if(sorting_track.find(QString::number(sort_id) + "1") != sorting_track.end()){
+        sorting_track.insert(QString::number(sort_id + 1) + "1", sorting_track.find(QString::number(sort_id) + "1").value());
+        sorting_track.erase(sorting_track.find(QString::number(sort_id) + "1"));
+    }
+    else{
+        for(auto it = sorting_track.find(QString::number(sort_id) + QString::number(sort_id + 1)); it != sorting_track.end(); it++){
+            //如果是34->45
+            sorting_track.insert(QString::number((it.key().toInt() / 10) + 1) + QString::number((it.key().toInt() % 10) + 1), it.value());
+            sorting_track.erase(it);
+        }
+    }
+    //将一段轨迹分为两段插入
+    sorting_track.insert(QString::number(find_id) + QString::number(find_id + 1),insert_points1);
+    sorting_track.insert(QString::number(find_id + 1) + QString::number(find_id + 2),insert_points2);
+}
+
+//容器拷贝
+void DataProcess::MyQVectorCopy(QVector<QPointF> &waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last){
+    for(auto it = first; it != last; it++){
+        waiting_value.push_back(*it);
+    }
+}
+
 //判断点是否在边界函数
 bool DataProcess::NearEdgeJudge(const QPointF* judge_point){
    if( judge_point->x() < 30 || 1875 - judge_point->x() < 30 || judge_point->y() < 30 || 749 - judge_point->y() < 30  ){
@@ -94,20 +130,38 @@ bool DataProcess::NearEdgeJudge(const QPointF* judge_point){
 
 //--------------功能函数--------------//
 //把新的id点和现有点进行正确的排序
-bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int,QVector<QPointF>> &update_all_stop_pointf, QPointF compare_point, int &change_id){
+bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &track_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int,QVector<QPointF>> &update_all_stop_pointf, QMap<int,QVector<QPointF>>& update_last_stop_pointf, QPointF compare_point, int &change_id){
     bool isincluded = false;
     int t = 1;
+    QVector<QPointF> tmp_push;
+    QVector<QPointF> insert_pointsf;
+    QVector<QPointF> insert_pointsl;
+    //先排序
+    for(auto sort_it = track_map.begin(); sort_it != track_map.end(); sort_it++){
+        QPointfSort(sort_it.value());
+    }
     while(t < i - 1){
-        QVector<QPointF>::iterator it = (new_map.find(QString::number(t) + QString::number(t + 1)).value()).begin();
-        for(;it != new_map.find(QString::number(t) + QString::number(t + 1)).value().end(); it++){
+        QVector<QPointF>::iterator it = (track_map.find(QString::number(t) + QString::number(t + 1)).value()).begin();
+        for(;it != track_map.find(QString::number(t) + QString::number(t + 1)).value().end(); it++){
             if(qAbs(X_Axis2World(compare_point.x()) - X_Axis2World(it->x())) < 100 && qAbs(X_Axis2World(compare_point.y()) - X_Axis2World(it->y())) < 100){ //说明这段轨迹中  包含了待测点
-                new_map.find(QString::number(t) + QString::number(t + 1)).value().clear();//清空轨迹点
-                update_stop_pointf.find(t + 1).value().swap(update_stop_pointf.find(i).value()); //交换坐标集
-                update_all_stop_pointf.find(t + 1).value().swap(update_all_stop_pointf.find(i).value());
-                compare_point = update_stop_pointf.find(i).value().first();
+                //track_map.find(QString::number(t) + QString::number(t + 1)).value().clear();//清空轨迹点
+
+                //给last里插入新的坐标
+                if(update_last_stop_pointf.find(i) == update_last_stop_pointf.end()){
+                    tmp_push.push_back(compare_point);
+                    update_last_stop_pointf.insert(i, tmp_push);
+                }
+                MapPointSort(update_all_stop_pointf, t + 1);//交换坐标集
+                MapPointSort(update_stop_pointf, t + 1);
+                MapPointSort(update_last_stop_pointf, t);
+                MyQVectorCopy(insert_pointsf, track_map.find(QString::number(t) + QString::number(t + 1)).value().begin(), it);
+                MyQVectorCopy(insert_pointsl, it, track_map.find(QString::number(t) + QString::number(t + 1)).value().end() - 1);
+
+                MapTrackSort(track_map, insert_pointsf, insert_pointsl, t);
+
                 isincluded = true;
                 change_id = t + 1;
-                break;
+                return isincluded;
             }
         }
         t++;
@@ -422,7 +476,9 @@ void DataProcess::AnalyzePoints(){
             last++;
         }
         for(;last != it->end(); first++, last++){//对剩下的坐标进行遍历
-
+            if(X_Axis2World(last->x())-X_Axis2World(first->x()) > 500){
+                qDebug()<<"1";
+            }
             push_stop_pointf.clear();//清空，为新id的坐标push做准备
             push_all_stop_pointf.clear();
             push_last_stop_pointf.clear();
@@ -483,7 +539,7 @@ void DataProcess::AnalyzePoints(){
 
 
                         //--------------检验新id点的正确性--------------//
-                        if(NewPointSort(next_id,push_track_pointf,uppush_stop_pointf, uppush_all_stop_pointf, stop_tmp_pointf2, now_id)){
+                        if(NewPointSort(next_id, push_track_pointf, uppush_stop_pointf, uppush_all_stop_pointf, uppush_last_stop_pointf, stop_tmp_pointf2, now_id)){
                             every_track_point.clear();
                         }
                     }

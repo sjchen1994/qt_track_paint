@@ -30,10 +30,13 @@ public:
     double Y_Axis2World(const double &tmp);
     double AnalyzeStopPoints(QVector<QPointF> ana_points);
     double AnalyzeTrackPoints(QVector<QPointF> ana_points);
+    void MyQVectorCopy(QVector<QPointF>& waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last);
+    void MapPointSort(QMap<int, QVector<QPointF> > &sorting_points, int find_id);
+    void MapTrackSort(QMap<QString, QVector<QPointF>>& sorting_track, QVector<QPointF> insert_points1, QVector<QPointF> insert_points2, int find_id);
     double GetDistanceOfPoints(const QPointF* first, const QPointF* second);
 
     bool NearEdgeJudge(const QPointF* judge_point);
-    bool NewPointSort(int i, QMap<QString, QVector<QPointF> > &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int, QVector<QPointF> > &update_all_stop_pointf, QPointF compare_point, int &change_id);
+    bool NewPointSort(int i, QMap<QString, QVector<QPointF> > &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int, QVector<QPointF> > &update_all_stop_pointf, QMap<int,QVector<QPointF>>& update_last_stop_pointf, QPointF compare_point, int &change_id);
 
 
     QMap<QChar,QPointF> edge_pointf;  //边缘点
