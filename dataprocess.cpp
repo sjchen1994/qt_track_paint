@@ -88,16 +88,29 @@ void DataProcess::QPointfOrderSort(QVector<QPointF> &vpf, const QString& key, co
     if(vpf.empty()){
         return;
     }
-    if(stop_pointf.find())
-    for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
-        for(auto first = vpf.begin(); first + 1 != last; first++){
-            if(first->x()>(first + 1)->x()){
-                tmp_pt = (*first);
-                *first = *(first + 1);
-                *(first + 1) = tmp_pt;
+    if(stop_pointf.find(key / 10).value()[0].x() - stop_pointf.find(key % 10).value()[0].x()){
+        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
+            for(auto first = vpf.begin(); first + 1 != last; first++){
+                if(first->x() > (first + 1)->x()){
+                    tmp_pt = (*first);
+                    *first = *(first + 1);
+                    *(first + 1) = tmp_pt;
+                }
             }
         }
     }
+    else{
+        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
+            for(auto first = vpf.begin(); first + 1 != last; first++){
+                if(first->x() < (first + 1)->x()){
+                    tmp_pt = (*first);
+                    *first = *(first + 1);
+                    *(first + 1) = tmp_pt;
+                }
+            }
+        }
+    }
+
 }
 
 //停止点map排序工具
