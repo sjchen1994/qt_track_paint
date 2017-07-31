@@ -187,9 +187,9 @@ void tracking::on_TrackAnalyze_triggered()
     for(; ana_it != dp.last_stop_pointf.end(); ana_it++){
         for(int ana_id = 1; ana_it->find(ana_id) != ana_it->end(); ana_id++){
             current_rowcount = ui->stop_stat_view1->rowCount();
-            ui->stop_stat_view1->setRowCount(current_rowcount+1);
-            ui->stop_stat_view1->setItem(current_rowcount,0,new QTableWidgetItem( QString::number(ana_id)));
-            ui->stop_stat_view1->setItem(current_rowcount,1,new QTableWidgetItem( QString::number( qSqrt( dp.AnalyzeStopPoints(ana_it->find(ana_id).value())) ) ));
+            ui->stop_stat_view1->setRowCount(current_rowcount + 1);
+            ui->stop_stat_view1->setItem(current_rowcount, 0, new QTableWidgetItem( QString::number(ana_id)));
+            ui->stop_stat_view1->setItem(current_rowcount, 1, new QTableWidgetItem( QString::number( qSqrt( dp.AnalyzeStopPoints(ana_it->find(ana_id).value())) ) ));
             //qDebug()<< analyze_stop_point(ana_it->find(ana_id).value());
         }
     }
@@ -198,9 +198,9 @@ void tracking::on_TrackAnalyze_triggered()
     for(auto ana_tra_it = dp.track_pointf.begin(); ana_tra_it != dp.track_pointf.end(); ana_tra_it++,ana_it++){
         for(auto it_tra = ana_tra_it->begin(); it_tra != ana_tra_it->end(); it_tra++){
             current_rowcount = ui->track_stat_view1->rowCount();
-            ui->track_stat_view1->setRowCount(current_rowcount+1);
-            ui->track_stat_view1->setItem(current_rowcount,0,new QTableWidgetItem(it_tra.key()));
-            ui->track_stat_view1->setItem(current_rowcount,1,new QTableWidgetItem(QString::number(qSqrt(dp.AnalyzeTrackPoints(it_tra.value())))));
+            ui->track_stat_view1->setRowCount(current_rowcount + 1);
+            ui->track_stat_view1->setItem(current_rowcount, 0, new QTableWidgetItem(it_tra.key()));
+            ui->track_stat_view1->setItem(current_rowcount, 1, new QTableWidgetItem(QString::number(qSqrt(dp.AnalyzeTrackPoints(it_tra.value())))));
         }
     }
 
@@ -209,11 +209,17 @@ void tracking::on_TrackAnalyze_triggered()
     QMap<QString,QPointF> indi_pointf;
     for(auto ana_tra_it = dp.track_pointf.begin(); ana_tra_it != dp.track_pointf.end(); ana_tra_it++,ana_it++){
         for(auto it_tra = ana_tra_it->begin(); it_tra != ana_tra_it->end(); it_tra++){
-            indi_pointf.insert(QString::number(it_tra.key().toInt()/10),it_tra.value().first());
+            if(it_tra.value().empty()){
+                //直接用下标为1的，可改
+                indi_pointf.insert(QString::number(it_tra.key().toInt() / 10), dp.last_stop_pointf.first().find(it_tra.key().toInt() / 10).value().first());
+            }
+            else{
+                indi_pointf.insert(QString::number(it_tra.key().toInt() / 10), it_tra.value().first());
+            }
             for(auto edge_it = dp.edge_pointf.begin(); edge_it != dp.edge_pointf.end(); edge_it++){//abc
                 for(auto it_tra_pt = it_tra.value().begin(); it_tra_pt != it_tra.value().end(); it_tra_pt++ ){//12
-                    if(dp.GetDistanceOfPoints(&edge_it.value(),it_tra_pt) < 100){
-                        indi_pointf.insert(edge_it.key(),*edge_it);
+                    if(dp.GetDistanceOfPoints(&edge_it.value(), it_tra_pt) < 100){
+                        indi_pointf.insert(edge_it.key(), *edge_it);
                         break;
                     }
                 }
@@ -228,21 +234,20 @@ void tracking::on_TrackAnalyze_triggered()
     illu_paint.setPen(illu_pen);
 
     for(auto it1 = indi_pointf.begin(), it2 = indi_pointf.begin(); it1 != indi_pointf.end(); it1++){
-        QPointF pt = it1.value()/10;
+        QPointF pt = it1.value() / 10;
         illu_paint.drawPoint(pt);
-        illu_paint.drawText(pt - QPointF(0,5),it1.key());
+        illu_paint.drawText(pt - QPointF(0,5), it1.key());
         if(it2+1 != indi_pointf.end()){
             it2++;
         }
         else{
             it2 = indi_pointf.begin();
         }
-        MyDrawArrow(pt,(it2).value()/10,illu_paint);
+        MyDrawArrow(pt,(it2).value() / 10, illu_paint);
     }
 
     //4
     QPointF show_pointf;
-    QVector<QMap<int,QVector<QPointF>>> pp = dp.all_stop_pointf;
     int all_size = 0;
     int insert_rowcount = 0;
     for(auto ana_all_it = dp.all_stop_pointf[0].begin(); ana_all_it != dp.all_stop_pointf[0].end(); ana_all_it++){
