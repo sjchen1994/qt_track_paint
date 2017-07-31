@@ -82,6 +82,37 @@ void DataProcess::QPointfSort(QVector<QPointF> &vpf){
     }
 }
 
+//点集排序函数(按照点顺序)
+void DataProcess::QPointfOrderSort(QVector<QPointF> &vpf, const QString& key, const QMap<int,QVector<QPointF>> &stop_pointf){
+    QPointF tmp_pt;
+    if(vpf.empty()){
+        return;
+    }
+    if(stop_pointf.find(key / 10).value()[0].x() - stop_pointf.find(key % 10).value()[0].x()){
+        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
+            for(auto first = vpf.begin(); first + 1 != last; first++){
+                if(first->x() > (first + 1)->x()){
+                    tmp_pt = (*first);
+                    *first = *(first + 1);
+                    *(first + 1) = tmp_pt;
+                }
+            }
+        }
+    }
+    else{
+        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
+            for(auto first = vpf.begin(); first + 1 != last; first++){
+                if(first->x() < (first + 1)->x()){
+                    tmp_pt = (*first);
+                    *first = *(first + 1);
+                    *(first + 1) = tmp_pt;
+                }
+            }
+        }
+    }
+
+}
+
 //停止点map排序工具
 void DataProcess::MapPointSort(QMap<int, QVector<QPointF>>& sorting_points, int find_id){
     while(find_id != sorting_points.lastKey()){
@@ -138,7 +169,8 @@ bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &track_map,
     QVector<QPointF> insert_pointsl;
     //先排序
     for(auto sort_it = track_map.begin(); sort_it != track_map.end(); sort_it++){
-        QPointfSort(sort_it.value());
+        QPointfOrderSort(sort_it.value(), sort_it.key(), update_stop_pointf);
+        //QPointfSort(sort_it.value());
     }
     while(t < i - 1){
         QVector<QPointF>::iterator it = (track_map.find(QString::number(t) + QString::number(t + 1)).value()).begin();

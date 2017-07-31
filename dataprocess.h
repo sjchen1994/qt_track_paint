@@ -23,6 +23,7 @@ public:
     void AnalyzePoints();
     void Sleep(unsigned int msec);
     void QPointfSort(QVector<QPointF> &vpf);
+    void QPointfOrderSort(QVector<QPointF> &vpf, const QString &key, const QMap<int, QVector<QPointF> > &stop_pointf);
 
     double X_World2Axis(const double &tmp);
     double X_Axis2World(const double &tmp);
