@@ -121,7 +121,7 @@ QVector<QPointF> DataProcess::QPointfOrderSort(const QVector<QPointF> &vpf, cons
     return result;
 }
 
-//chongzai
+//点集排序函数(按照点顺序)
 QVector<QPointF> DataProcess::QPointfOrderSortForJumpInsert(const QVector<QPointF> &vpf, int nowid, const QMap<int,QVector<QPointF>> &stop_pointf){
     int t = 1;
 
@@ -512,10 +512,14 @@ void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int n
     int compare_id = nowid + 1;
     QVector<QPointF> insert_pointsf;
     QVector<QPointF> insert_pointsl;
-    //这里问题很大
     if(inserting_points.empty()){
         return;
     }
+
+
+
+
+
     inserting_points = QPointfOrderSortForJumpInsert(inserting_points, nowid, stop_pointf);
     if(nextid == 1){
         while(compare_id <= maxid){
