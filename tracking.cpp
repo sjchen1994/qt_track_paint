@@ -1,6 +1,7 @@
 #include "tracking.h"
 #include "ui_tracking.h"
 
+int conn_line_push = 0;
 QColor v_color[7] = {Qt::black, Qt::cyan, Qt::magenta, Qt::green, Qt::yellow, Qt::blue, Qt::gray};
 QColor s_color[7] = {Qt::red, Qt::darkCyan, Qt::darkMagenta, Qt::darkGreen, Qt::darkYellow, Qt::darkBlue, Qt::darkGray};
 
@@ -272,34 +273,81 @@ void tracking::on_TrackAnalyze_triggered()
 //--------------连线按钮事件--------------//
 void tracking::on_TrackConnect_triggered()
 {
-    QPainter paintpoint(&axis_image);
-    QPen pen;
-    int t = 0;
-    pen.setWidth(0.2);
-    QVector<QPointF>::iterator it1;
-    QVector<QPointF>::iterator it2;
+    if(conn_line_push == 0){
+        QPainter paintpoint(&axis_image);
+        QPen pen;
+        int t = 0;
+        pen.setWidth(0.2);
+        QVector<QPointF>::iterator it1;
+        QVector<QPointF>::iterator it2;
 
-    //画的是show_g_pointf里的点，即假设点击过清空按钮以后，之后显示的轨迹不会包括之前清空过的
-    for(auto it = dp.show_g_pointf.begin();it != dp.show_g_pointf.end(); it++){
+        //画的是show_g_pointf里的点，即假设点击过清空按钮以后，之后显示的轨迹不会包括之前清空过的
+        for(auto it = dp.show_g_pointf.begin();it != dp.show_g_pointf.end(); it++){
 
-        pen.setColor(v_color[t]);
-        t++;
-        paintpoint.setPen(pen);
-        it1 = it->begin();
-        if(it->size() > 1){
-            it2 = it1 + 1;
-        }
-        else{
-            continue;
-        }
-        //距离小于300的坐标才会被连接（如果车从一边离开视野，又从另一边进入视野，这临界的两个点是不应该相连的）（300数值可调，根据读取坐标速度）
-        for(;it2 != it->end(); it1++, it2++){
-            if( qAbs( dp.X_Axis2World(it1->x()) - dp.X_Axis2World(it2->x()) ) < 300 && qAbs( dp.Y_Axis2World(it1->y()) - dp.Y_Axis2World(it2->y()) ) < 300){
-                paintpoint.drawLine(*it1, *it2);
+            pen.setColor(v_color[t]);
+            t++;
+            paintpoint.setPen(pen);
+            it1 = it->begin();
+            if(it->size() > 1){
+                it2 = it1 + 1;
+            }
+            else{
+                continue;
+            }
+            //距离小于300的坐标才会被连接（如果车从一边离开视野，又从另一边进入视野，这临界的两个点是不应该相连的）（300数值可调，根据读取坐标速度）
+            for(;it2 != it->end(); it1++, it2++){
+                if( qAbs( dp.X_Axis2World(it1->x()) - dp.X_Axis2World(it2->x()) ) < 300 && qAbs( dp.Y_Axis2World(it1->y()) - dp.Y_Axis2World(it2->y()) ) < 300){
+                    paintpoint.drawLine(*it1, *it2);
+                }
             }
         }
+        this->repaint();
+        conn_line_push = 1;
     }
-    this->repaint();
+    else{
+        axis_image = QImage(1250 * 1.5, 500 * 1.5, QImage::Format_RGB32);
+        QColor backColor = qRgb(255, 255, 255);
+        axis_image.fill(backColor);
+        QPainter mypainter(&axis_image);
+        int point0x = 61, point0y = 727.5;//坐标轴原点
+        int pointx = 25.5, pointy = 79.77;
+        int width = 1811.25,height = 712.5;//坐标轴宽度，高度
+        mypainter.drawRect(5,5,1250 * 1.5-10, 500 * 1.5-10);//外围矩形
+        //y
+        mypainter.drawLine(point0x, point0y - height, point0x, point0y);
+        //x
+        mypainter.drawLine(pointx, pointy, pointx + width, pointy);
+
+        QPen pendegree;
+        pendegree.setColor(Qt::black);
+        pendegree.setWidth(2);
+        mypainter.setPen(pendegree);
+        //x轴刻度
+        for(int i = 0; i < 30; i++){
+            mypainter.drawLine(pointx + (i + 1) * width / 30, pointy, pointx + (i + 1) * width / 30, pointy + 4);
+            mypainter.drawText(pointx+(i + 0.65) * width / 30, pointy + 13, QString::number(-100 + (i + 1) * 170));
+        }
+        //y轴刻度
+        for(int i = 0; i < 20; i++){
+            mypainter.drawLine(point0x, point0y - i * height / 20, point0x + 4, point0y - i * height / 20);
+            mypainter.drawText(point0x - 22, point0y - (i - 0.15) * height / 20, QString::number(2000 - i * 110));
+        }
+        //QPainter paintpoint(&axis_image);
+        QPen pen;
+        pen.setWidth(2);
+        int t = 0;
+        for(QVector<QPointF> spe_id_pointf : dp.g_pointf){
+            pen.setColor(v_color[t]);
+            mypainter.setPen(pen);
+            mypainter.drawPoints(spe_id_pointf);
+            t++;
+            this->repaint();
+        }
+        //PaintPointf(dp.g_pointf);
+        this->repaint();
+        conn_line_push = 0;
+    }
+
 }
 
 //--------------清除界面按钮事件--------------//

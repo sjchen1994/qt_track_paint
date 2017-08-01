@@ -11,6 +11,7 @@
 #include <QMap>
 #include <QDebug>
 #include <QFile>
+#include <QMutex>
 class DataProcess : public QThread
 {
     Q_OBJECT
@@ -23,12 +24,13 @@ public:
     void AnalyzePoints();
     void Sleep(unsigned int msec);
     void QPointfSort(QVector<QPointF> &vpf);
-    void QPointfOrderSort(QVector<QPointF> &vpf, const QString &key, const QMap<int, QVector<QPointF> > &stop_pointf);
-
+    QVector<QPointF> QPointfOrderSort(const QVector<QPointF> &vpf, const QString &key, const QMap<int, QVector<QPointF> > &stop_pointf);
+    QVector<QPointF> QPointfOrderSortForJumpInsert(const QVector<QPointF> &vpf, int nowid, const QMap<int, QVector<QPointF> > &stop_pointf);
     double X_World2Axis(const double &tmp);
     double X_Axis2World(const double &tmp);
     double Y_World2Axis(const double &tmp);
     double Y_Axis2World(const double &tmp);
+    void JumpPointInsert(QVector<QPointF> inserting_points, int nowid, int nextid, const QMap<int, QVector<QPointF> > &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf);
     double AnalyzeStopPoints(QVector<QPointF> ana_points);
     double AnalyzeTrackPoints(QVector<QPointF> ana_points);
     void MyQVectorCopy(QVector<QPointF>& waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last);
@@ -38,6 +40,7 @@ public:
 
     bool NearEdgeJudge(const QPointF* judge_point);
     bool NewPointSort(int i, QMap<QString, QVector<QPointF> > &new_map, QMap<int,QVector<QPointF>> &update_stop_pointf, QMap<int, QVector<QPointF> > &update_all_stop_pointf, QMap<int,QVector<QPointF>>& update_last_stop_pointf, QPointF compare_point, int &change_id);
+
 
 
     QMap<QChar,QPointF> edge_pointf;  //边缘点

@@ -11,7 +11,7 @@
 QVector<QPointF> empty_show_g_sub_pointf; //用于push_back到show_g_pointf的
 QVector<QVector<double>> g_angle;                //存储所有点的角度
 QVector<int> g_size;                                      //存储对应model_id点个数
-
+QMutex mutex;
 int new_pt_join = 0;                                       //标记是否有新的model_id点加入点集
 int wechat_push = 0;                                     //标记微信通知功能是否打开
 int stop_times = 0;                                        //记录停止次数
@@ -60,6 +60,7 @@ double DataProcess::GetDistanceOfPoints(const QPointF *first, const QPointF *sec
 
 //容器拷贝
 void DataProcess::MyQVectorCopy(QVector<QPointF> &waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last){//按照迭代器范围拷贝容器    可考虑写成模版
+    waiting_value.clear();
     for(auto it = first; it != last; it++){
         waiting_value.push_back(*it);
     }
@@ -90,34 +91,66 @@ void DataProcess::QPointfSort(QVector<QPointF> &vpf){
 }
 
 //点集排序函数(按照点顺序)
-void DataProcess::QPointfOrderSort(QVector<QPointF> &vpf, const QString& key, const QMap<int,QVector<QPointF>> &stop_pointf){
-    QPointF tmp_pt;
-    if(vpf.empty()){
-        return;
+QVector<QPointF> DataProcess::QPointfOrderSort(const QVector<QPointF> &vpf, const QString& key, const QMap<int,QVector<QPointF>> &stop_pointf){
+    int t = 1;
+    QPointF head_point = stop_pointf.find(key.toInt() / 10).value()[0];//作为比较的头结点
+    QPointF nearest_point;  //最近的点
+    QMap<int, QPointF> VPF;//可能有问题
+    for(QPointF pointf: vpf){//将点信息输入
+        VPF.insert(t, pointf);
+        t++;
     }
-    if(stop_pointf.find(key.toInt() / 10).value()[0].x() - stop_pointf.find(key.toInt() % 10).value()[0].x() < 0){ //判断是从小到大还是从大到小
-        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
-            for(auto first = vpf.begin(); first + 1 != last; first++){
-                if(first->x() > (first + 1)->x()){
-                    tmp_pt = (*first);
-                    *first = *(first + 1);
-                    *(first + 1) = tmp_pt;
-                }
+    double distance_to_head = 10000;
+    QVector<QPointF> result;//存储排序结果
+    t = 1;
+    while(!VPF.empty()){
+        for(auto it = VPF.begin(); it != VPF.end(); it++){
+            if(qAbs(it.value().x() - head_point.x()) + qAbs(it.value().y() - head_point.y()) < distance_to_head){//
+                nearest_point = it.value();
+                distance_to_head = qAbs(it.value().x() - head_point.x()) + qAbs(it.value().y() - head_point.y());
+                t = it.key();
             }
         }
-    }
-    else{
-        for(auto last = vpf.end(); last - 1 != vpf.begin(); last--){
-            for(auto first = vpf.begin(); first + 1 != last; first++){
-                if(first->x() < (first + 1)->x()){
-                    tmp_pt = (*first);
-                    *first = *(first + 1);
-                    *(first + 1) = tmp_pt;
-                }
-            }
+        VPF.erase(VPF.find(t)); //从容器中删除
+        if(distance_to_head < 100){
+            result.push_back(nearest_point);
+            head_point = nearest_point;
         }
+        distance_to_head = 10000;
     }
+    return result;
+}
 
+//chongzai
+QVector<QPointF> DataProcess::QPointfOrderSortForJumpInsert(const QVector<QPointF> &vpf, int nowid, const QMap<int,QVector<QPointF>> &stop_pointf){
+    int t = 1;
+
+    QPointF head_point = stop_pointf.find(nowid).value()[0];//作为比较的头结点
+    QPointF nearest_point;  //最近的点
+    QMap<int, QPointF> VPF;//可能有问题
+    for(QPointF pointf: vpf){//将点信息输入
+        VPF.insert(t, pointf);
+        t++;
+    }
+    double distance_to_head = 10000;
+    QVector<QPointF> result;//存储排序结果
+    t = 1;
+    while(!VPF.empty()){
+        for(auto it = VPF.begin(); it != VPF.end(); it++){
+            if(qAbs(it.value().x() - head_point.x()) + qAbs(it.value().y() - head_point.y()) < distance_to_head){//
+                nearest_point = it.value();
+                distance_to_head = qAbs(it.value().x() - head_point.x()) + qAbs(it.value().y() - head_point.y());
+                t = it.key();
+            }
+        }
+        VPF.erase(VPF.find(t)); //从容器中删除
+        if(distance_to_head < 100){
+            result.push_back(nearest_point);
+            head_point = nearest_point;
+        }
+        distance_to_head = 10000;
+    }
+    return result;
 }
 
 //停止点map排序工具
@@ -183,7 +216,7 @@ bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &track_map,
     QVector<QPointF> insert_pointsl;
     //先排序
     for(auto sort_it = track_map.begin(); sort_it != track_map.end(); sort_it++){
-        QPointfOrderSort(sort_it.value(), sort_it.key(), update_stop_pointf);
+        sort_it.value() = QPointfOrderSort(sort_it.value(), sort_it.key(), update_stop_pointf);
         //QPointfSort(sort_it.value());
     }
     while(t < i - 1){
@@ -220,6 +253,7 @@ bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &track_map,
 
 //获取最新的点
 void DataProcess::GetPoint(){
+    QMutexLocker locker(&mutex);
     double tmp_value;
     int i = 0;
     QPointF tmp_point;
@@ -296,6 +330,7 @@ void DataProcess::GetPoint(){
             new_pt_join = 1;
         }
     }
+
 }
 
 //循环判断函数：传递最新的点给主进程
@@ -431,6 +466,9 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
     QPointfSort(ana_points);
     double sum = 0;
     int size = ana_points.size() / 20;
+    if(!size){
+        size = 1;
+    }
     QPointF ave_p1;
     QPointF ave_p2;
 
@@ -468,10 +506,61 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
     return sum / ana_points.size();
 }
 
+//
+void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int nowid, const int nextid, const QMap<int,QVector<QPointF>> &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf){
+    int maxid = stop_pointf.lastKey();
+    int compare_id = nowid + 1;
+    QVector<QPointF> insert_pointsf;
+    QVector<QPointF> insert_pointsl;
+    //这里问题很大
+    if(inserting_points.empty()){
+        return;
+    }
+    inserting_points = QPointfOrderSortForJumpInsert(inserting_points, nowid, stop_pointf);
+    if(nextid == 1){
+        while(compare_id <= maxid){
+            for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
+                //说明这段轨迹中  包含了待测点
+                if(qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].y()) - X_Axis2World(it->y())) < 50){
+                    MyQVectorCopy(insert_pointsf, inserting_points.begin(), it);
+                    MyQVectorCopy(insert_pointsl, it, inserting_points.end() -1);
+
+                    push_track_pointf.find(QString::number(compare_id -1) + QString::number(compare_id)).value().append(insert_pointsf);
+                    break;
+                }
+            }
+            compare_id++;
+            inserting_points = insert_pointsl;
+
+
+        }
+        push_track_pointf.find(QString::number(compare_id -1) + "1").value().append(insert_pointsl);
+    }
+    else{
+        while(compare_id < nextid){
+            for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
+                //说明这段轨迹中  包含了待测点
+                if(qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].y()) - X_Axis2World(it->y())) < 50){
+                    MyQVectorCopy(insert_pointsf, inserting_points.begin(), it);
+                    MyQVectorCopy(insert_pointsl, it, inserting_points.end() -1);
+
+                    push_track_pointf.find(QString::number(compare_id -1) + QString::number(compare_id)).value().append(insert_pointsf);
+                    break;
+                }
+            }
+            compare_id++;
+            inserting_points = insert_pointsl;
+        }
+        push_track_pointf.find(QString::number(compare_id -1) + QString::number(nextid)).value().append(insert_pointsl);
+    }
+}
+
 //点集分析主函数
 void DataProcess::AnalyzePoints(){
+
+    QVector<QVector<QPointF>> tmp_g_pointf = this->g_pointf;
     int max_id = 1;
-    int cal_max_id;
+    //int cal_max_id;
     int i;
     int now_id;
     int next_id;
@@ -506,7 +595,7 @@ void DataProcess::AnalyzePoints(){
      * QVector<QMap<QString,QVector<QPointF>>> track_pointf : 所有轨迹坐标    示例: "12",(558.221,241.704)...  指  id为 1 2 之间的轨迹坐标集
     */
 
-    for(auto it = g_pointf.begin(); it != g_pointf.end(); it++){//大循环，考虑不同model_id的坐标 抓出要分析的坐标
+    for(auto it = tmp_g_pointf.begin(); it != tmp_g_pointf.end(); it++){//大循环，考虑不同model_id的坐标 抓出要分析的坐标
         if(it->size() < 2){//如果坐标数目不够2个  则无需判断 退出
             continue;
         }
@@ -625,22 +714,26 @@ void DataProcess::AnalyzePoints(){
                     }
 
                     //检查是否有错误的轨迹数据集
-                    cal_max_id = max_id;
+                    /*cal_max_id = max_id;
                     while(--cal_max_id){
                         if(push_track_pointf.find(QString::number(cal_max_id) + "1") != push_track_pointf.end()){//说明存在错误的轨迹坐标集 删之
                             push_track_pointf.erase(push_track_pointf.find(QString::number(cal_max_id) + "1"));
                         }
-                    }
+                    }*/
 
                     //push 要分析的点坐标
                     if(push_track_pointf.find(QString::number(now_id,10) + QString::number(next_id,10)) != push_track_pointf.end()){//不支持2个点
                         if((now_id > next_id && now_id - next_id > 1 ) || (now_id < next_id && next_id - now_id == 1)){
                             (push_track_pointf.find(QString::number(now_id,10) + QString::number(next_id,10)).value()).append(every_track_point);
                         }
+
                     }
                     else{
                         if((now_id > next_id && next_id == 1) || (now_id < next_id && next_id - now_id == 1)){
                             push_track_pointf.insert(QString::number(now_id,10) + QString::number(next_id,10),every_track_point);
+                        }
+                        else{
+                            JumpPointInsert(every_track_point, now_id, next_id, uppush_stop_pointf, push_track_pointf);
                         }
                     }
                     if(!every_track_point.empty()){
