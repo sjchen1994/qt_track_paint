@@ -157,7 +157,11 @@ void tracking::on_quit_triggered()
 {
     rd.ProTeminal();
     wp.ProTeminal();
-    dp.terminate();//停止数据处理线程
+    dp.over_label = 1;
+
+    dp.wait(1000);
+
+    //dp.terminate();//停止数据处理线程
     this->close();
 }
 

@@ -19,7 +19,7 @@
      <rect>
       <x>380</x>
       <y>750</y>
-      <width>355</width>
+      <width>371</width>
       <height>192</height>
      </rect>
     </property>
@@ -27,9 +27,9 @@
    <widget class="QTableWidget" name="track_stat_view1">
     <property name="geometry">
      <rect>
-      <x>750</x>
+      <x>770</x>
       <y>750</y>
-      <width>140</width>
+      <width>171</width>
       <height>192</height>
      </rect>
     </property>

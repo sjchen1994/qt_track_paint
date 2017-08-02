@@ -30,7 +30,7 @@ public:
     double X_Axis2World(const double &tmp);
     double Y_World2Axis(const double &tmp);
     double Y_Axis2World(const double &tmp);
-    void JumpPointInsert(QVector<QPointF> inserting_points, int nowid, int nextid, const QMap<int, QVector<QPointF> > &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf);
+    void JumpPointInsert(QVector<QPointF> inserting_points, int nowid, const QMap<int, QVector<QPointF> > &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf);
     double AnalyzeStopPoints(QVector<QPointF> ana_points);
     double AnalyzeTrackPoints(QVector<QPointF> ana_points);
     void MyQVectorCopy(QVector<QPointF>& waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last);
@@ -53,6 +53,7 @@ public:
     int clear_pushed = 0;                     //标记是否点击过清空按钮（清空坐标容器）（会重置）
     int data_clear = 0;                       //标记是否点击过清空按钮（用在点击后有新坐标加入时）（会重置）
     int ever_clear = 0;                       //标记是否曾经点击过清空按钮（不会重置）
+    int over_label = 0;
 signals:
     void Senddata(const QVector<QVector<QPointF>> g_pointf);
 };
