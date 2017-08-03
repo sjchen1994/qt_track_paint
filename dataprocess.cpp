@@ -29,7 +29,7 @@ void DataProcess::run(){
     this->GetPoint();
     emit Senddata(g_pointf);
     while(true){
-        if(this->over_label == 1){
+        if(this->quit_flag == 1){
             break;
         }
         this->Sleep(50);
@@ -526,7 +526,7 @@ double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
     return sum / ana_points.size();
 }
 
-//
+//将未识别到中间停止点的轨迹分割，正确插入容器中
 void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int nowid, const QMap<int,QVector<QPointF>> &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf){
     int maxid = stop_pointf.lastKey();
     QVector<QPointF> insert_pointsf;
@@ -534,9 +534,10 @@ void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int n
     if(inserting_points.empty()){
         return;
     }
-    inserting_points = QPointfOrderSortForJumpInsert(inserting_points, nowid, stop_pointf);
+    inserting_points = QPointfOrderSortForJumpInsert(inserting_points, nowid, stop_pointf); //按照轨迹方向排序
     int it_now = nowid;
     int it_next = (nowid == maxid? 1: nowid + 1);
+    //将获取到的轨迹段插入对应的容器中
     while(true){
         for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
             if(qAbs(X_Axis2World(stop_pointf.find(it_next).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(it_next).value()[0].y()) - X_Axis2World(it->y())) < 50){
@@ -553,45 +554,6 @@ void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int n
         it_next = (it_next == maxid? 1 : it_next + 1);
         it_now   = (it_now == maxid? 1 : it_now + 1);
     }
-
-
-
-    /*if(nextid == 1){
-        while(compare_id <= maxid){
-            for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
-                //说明这段轨迹中  包含了待测点
-                if(qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].y()) - X_Axis2World(it->y())) < 50){
-                    MyQVectorCopy(insert_pointsf, inserting_points.begin(), it);
-                    MyQVectorCopy(insert_pointsl, it, inserting_points.end() -1);
-
-                    push_track_pointf.find(QString::number(compare_id -1) + QString::number(compare_id)).value().append(insert_pointsf);
-                    break;
-                }
-            }
-            compare_id++;
-            inserting_points = insert_pointsl;
-
-
-        }
-        push_track_pointf.find(QString::number(compare_id -1) + "1").value().append(insert_pointsl);
-    }
-    else{
-        while(compare_id < nextid){
-            for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
-                //说明这段轨迹中  包含了待测点
-                if(qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(compare_id).value()[0].y()) - X_Axis2World(it->y())) < 50){
-                    MyQVectorCopy(insert_pointsf, inserting_points.begin(), it);
-                    MyQVectorCopy(insert_pointsl, it, inserting_points.end() -1);
-
-                    push_track_pointf.find(QString::number(compare_id -1) + QString::number(compare_id)).value().append(insert_pointsf);
-                    break;
-                }
-            }
-            compare_id++;
-            inserting_points = insert_pointsl;
-        }
-        push_track_pointf.find(QString::number(compare_id -1) + QString::number(nextid)).value().append(insert_pointsl);
-    }*/
 }
 
 //点集分析主函数

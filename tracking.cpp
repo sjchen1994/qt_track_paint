@@ -118,7 +118,7 @@ void tracking::PaintPointf(const QVector<QVector<QPointF> > &tmp_points){
         paintpoint.setPen(pen);
         paintpoint.drawPoints(spe_id_pointf);
         t++;
-        this->repaint();
+        this->update();
     }
 }
 
@@ -157,7 +157,7 @@ void tracking::on_quit_triggered()
 {
     rd.ProTeminal();
     wp.ProTeminal();
-    dp.over_label = 1;
+    dp.quit_flag = 1;
 
     dp.wait(1000);
 
@@ -266,7 +266,7 @@ void tracking::on_TrackAnalyze_triggered()
         insert_rowcount++;
         show_pointf = QPointF(0,0);
     }
-    this->repaint();
+    this->update();
     dp.stop_pointf.clear();
     dp.track_pointf.clear();
     dp.last_stop_pointf.clear();
@@ -305,7 +305,7 @@ void tracking::on_TrackConnect_triggered()
                 }
             }
         }
-        this->repaint();
+        this->update();
         conn_line_push = 1;
     }
     else{
@@ -345,10 +345,10 @@ void tracking::on_TrackConnect_triggered()
             mypainter.setPen(pen);
             mypainter.drawPoints(spe_id_pointf);
             t++;
-            this->repaint();
+            this->update();
         }
         //PaintPointf(dp.g_pointf);
-        this->repaint();
+        this->update();
         conn_line_push = 0;
     }
 
@@ -393,7 +393,7 @@ void tracking::on_InterfaceClear_triggered()
     ui->track_stat_view1->setRowCount(0);
     ui->stop_stat_view1->clearContents();
     ui->track_stat_view1->clearContents();
-    this->repaint();
+    this->update();
     ui->analyze_button->setEnabled(true);
 
 }
@@ -407,7 +407,7 @@ void tracking::on_txt_clear_triggered()
     file.open(QIODevice::WriteOnly);
     file.close();
     ui->txtclr_label->setText("清除成功");
-    this->repaint();
+    this->update();
     //dp.sleep(1000);
     ui->txtclr_label->setText("清空坐标");
 }
