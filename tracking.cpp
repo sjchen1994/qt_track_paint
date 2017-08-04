@@ -152,6 +152,10 @@ void tracking::on_ScreenShot_triggered()
     save_image.save("ScreenShot.png","png");
 }
 
+void tracking::quit(){
+    this->on_quit_triggered();
+}
+
 //--------------退出按钮事件--------------//
 void tracking::on_quit_triggered()
 {
@@ -162,7 +166,9 @@ void tracking::on_quit_triggered()
     dp.wait(1000);
 
     //dp.terminate();//停止数据处理线程
+
     this->close();
+    emit SendSignal();
 }
 
 //--------------微信按钮事件--------------//

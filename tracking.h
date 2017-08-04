@@ -26,6 +26,7 @@ public:
 
     void Init();
     void paintEvent(QPaintEvent *);
+    void quit();
     void PaintPointf(const QVector<QVector<QPointF> > &tmp_points);
     void MyDrawArrow(const QPointF& pt1, const QPointF& pt2, QPainter &p);
 
@@ -47,7 +48,8 @@ private slots:
     void on_txt_clear_triggered();
 
     void on_rece_data_triggered();
-
+signals:
+    void SendSignal();
 private:
     QPoint mouse_pos;
     rece_data rd;

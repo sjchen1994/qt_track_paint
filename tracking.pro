@@ -28,14 +28,20 @@ SOURCES += \
         tracking.cpp \
     dataprocess.cpp \
     wechat_push.cpp \
-    rece_data.cpp
+    rece_data.cpp \
+    welcome.cpp \
+    docking.cpp
 
 HEADERS += \
         tracking.h \
     dataprocess.h \
     wechat_push.h \
-    rece_data.h
+    rece_data.h \
+    welcome.h \
+    docking.h
 
 FORMS += \
-        tracking.ui
+        tracking.ui \
+    welcome.ui \
+    docking.ui
 
