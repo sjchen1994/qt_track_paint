@@ -11,6 +11,8 @@ public:
     void ProTeminal();
     virtual void run();
     QProcess *pro;
+
+    QString dir;
 };
 
 #endif // RECE_DATA_H

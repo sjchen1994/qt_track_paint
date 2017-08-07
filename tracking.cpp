@@ -421,6 +421,7 @@ void tracking::on_txt_clear_triggered()
 //--------------从摄像头程序获取坐标线程--------------//
 void tracking::on_rece_data_triggered()
 {
+    rd.dir = "D:\\project\\test\\Debug\\test.exe";
     rd.start();
 }
 
