@@ -1,4 +1,4 @@
-#include "rece_data.h"
+﻿#include "rece_data.h"
 
 //--------------构造函数--------------//
 rece_data::rece_data()
@@ -17,11 +17,6 @@ void rece_data::run(){
 void rece_data::ProTeminal(){
     if(pro){
        pro->kill();
-
-       /*qDebug()<<"before teminate";
-       this->terminate();
-       this->wait();
-       qDebug() <<" after teminate";*/
    }
 }
 

@@ -1,4 +1,4 @@
-#include "welcome.h"
+﻿#include "welcome.h"
 #include "ui_welcome.h"
 
 welcome::welcome(QWidget *parent) :
@@ -6,6 +6,8 @@ welcome::welcome(QWidget *parent) :
     ui(new Ui::welcome)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::WindowStaysOnTopHint);
+    this->setFixedSize(200, 150);
     connect(&track, SIGNAL(SendSignal()), this, SLOT(reshow()));
     connect(&dock, SIGNAL(SendSignal()), this, SLOT(reshow()));
 }

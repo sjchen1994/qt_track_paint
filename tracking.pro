@@ -31,7 +31,8 @@ SOURCES += \
     wechat_push.cpp \
     rece_data.cpp \
     welcome.cpp \
-    docking.cpp
+    docking.cpp \
+    mytools.cpp
 
 HEADERS += \
         tracking.h \
@@ -39,7 +40,8 @@ HEADERS += \
     wechat_push.h \
     rece_data.h \
     welcome.h \
-    docking.h
+    docking.h \
+    mytools.h
 
 FORMS += \
         tracking.ui \

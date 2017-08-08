@@ -1,4 +1,4 @@
-#include "dataprocess.h"
+﻿#include "dataprocess.h"
 //----------------宏定义--------------//
 #define kx 0.355147      //x坐标转换系数
 #define ky 0.323863     //y坐标转换系数
@@ -32,7 +32,7 @@ void DataProcess::run(){
         if(this->quit_flag == 1){
             break;
         }
-        this->Sleep(50);
+        tools.Sleep(50);
         this->MainLoop();
     }
 }
@@ -59,21 +59,6 @@ double DataProcess::Y_World2Axis(const double &tmp){
 //获得两点之间的距离
 double DataProcess::GetDistanceOfPoints(const QPointF *first, const QPointF *second){
     return qSqrt(qPow(X_Axis2World(first->x()) - X_Axis2World(second->x()), 2) + qPow(Y_Axis2World(first->y()) - Y_Axis2World(second->y()), 2));
-}
-
-//容器拷贝
-void DataProcess::MyQVectorCopy(QVector<QPointF> &waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last){//按照迭代器范围拷贝容器    可考虑写成模版
-    waiting_value.clear();
-    for(auto it = first; it != last; it++){
-        waiting_value.push_back(*it);
-    }
-}
-
-//时延函数
-void DataProcess::Sleep(unsigned int msec){
-    QTime reachtime = QTime::currentTime().addMSecs(msec);
-    while( QTime::currentTime() < reachtime){
-    }
 }
 
 //点集排序函数(从小到大)
@@ -259,8 +244,10 @@ bool DataProcess::NewPointSort(int i, QMap<QString,QVector<QPointF>> &track_map,
                 MapPointSort(update_last_stop_pointf, t + 1);
 
                 //更新轨迹点
-                MyQVectorCopy(insert_pointsf, track_map.find(QString::number(t) + QString::number(t + 1)).value().begin(), it);
-                MyQVectorCopy(insert_pointsl, it, track_map.find(QString::number(t) + QString::number(t + 1)).value().end());
+                tools.ContainerCopy(insert_pointsf, track_map.find(QString::number(t) + QString::number(t + 1)).value().begin(), it);
+                //MyQVectorCopy(insert_pointsf, track_map.find(QString::number(t) + QString::number(t + 1)).value().begin(), it);
+                tools.ContainerCopy(insert_pointsl, it, track_map.find(QString::number(t) + QString::number(t + 1)).value().end());
+                //MyQVectorCopy(insert_pointsl, it, track_map.find(QString::number(t) + QString::number(t + 1)).value().end());
                 MapTrackSort(track_map, insert_pointsf, insert_pointsl, t);
 
                 isincluded = true;
@@ -543,8 +530,8 @@ void DataProcess::JumpPointInsert(QVector<QPointF> inserting_points, const int n
     while(true){
         for(auto it = inserting_points.begin(); it != inserting_points.end(); it++){
             if(qAbs(X_Axis2World(stop_pointf.find(it_next).value()[0].x()) - X_Axis2World(it->x())) < 50 && qAbs(X_Axis2World(stop_pointf.find(it_next).value()[0].y()) - X_Axis2World(it->y())) < 50){
-                MyQVectorCopy(insert_pointsf, inserting_points.begin(), it);
-                MyQVectorCopy(insert_pointsl, it, inserting_points.end());
+                tools.ContainerCopy(insert_pointsf, inserting_points.begin(), it);
+                tools.ContainerCopy(insert_pointsl, it, inserting_points.end());
                 inserting_points = insert_pointsl;
                 push_track_pointf.find(QString::number(it_now) + QString::number(it_next)).value().append(insert_pointsf);
                 break;

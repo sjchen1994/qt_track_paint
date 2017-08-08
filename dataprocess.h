@@ -1,4 +1,4 @@
-#ifndef DATAPROCESS_H
+﻿#ifndef DATAPROCESS_H
 #define DATAPROCESS_H
 #include <QTextStream>
 #include <QtMath>
@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMutex>
+#include <mytools.h>
 class DataProcess : public QThread
 {
     Q_OBJECT
@@ -22,7 +23,6 @@ public:
     void GetPoint();
     void MainLoop();
     void AnalyzePoints();
-    void Sleep(unsigned int msec);
     void QPointfSort(QVector<QPointF> &vpf);
     QVector<QPointF> QPointfOrderSort(const QVector<QPointF> &vpf, const QString &key, const QMap<int, QVector<QPointF> > &stop_pointf);
     QVector<QPointF> QPointfOrderSortForJumpInsert(const QVector<QPointF> &vpf, int nowid, const QMap<int, QVector<QPointF> > &stop_pointf);
@@ -33,7 +33,6 @@ public:
     void JumpPointInsert(QVector<QPointF> inserting_points, int nowid, const QMap<int, QVector<QPointF> > &stop_pointf, QMap<QString,QVector<QPointF>>& push_track_pointf);
     double AnalyzeStopPoints(QVector<QPointF> ana_points);
     double AnalyzeTrackPoints(QVector<QPointF> ana_points);
-    void MyQVectorCopy(QVector<QPointF>& waiting_value, QVector<QPointF>::iterator first, QVector<QPointF>::iterator last);
     void MapPointSort(QMap<int, QVector<QPointF> > &sorting_points, int find_id);
     void MapTrackSort(QMap<QString, QVector<QPointF>>& sorting_track, QVector<QPointF> insert_points1, QVector<QPointF> insert_points2, int find_id);
     double GetDistanceOfPoints(const QPointF* first, const QPointF* second);
@@ -56,6 +55,8 @@ public:
     int quit_flag = 0;
 signals:
     void Senddata(const QVector<QVector<QPointF>> g_pointf);
+private:
+    MyTools tools;
 };
 
 #endif // DATAPROCESS_H

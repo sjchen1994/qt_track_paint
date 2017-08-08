@@ -1,4 +1,4 @@
-#include "tracking.h"
+﻿#include "tracking.h"
 #include "ui_tracking.h"
 
 int conn_line_push = 0;
@@ -10,8 +10,10 @@ tracking::tracking(QWidget *parent) :
     ui(new Ui::tracking)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
     this->setWindowIcon(QIcon("tracking.jpg"));
+    this->setFixedSize(1875, 1000);
     //界面控件初始化
 
     ui->stop_stat_view1->setColumnCount(4);

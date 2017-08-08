@@ -6,7 +6,9 @@ docking::docking(QWidget *parent) :
     ui(new Ui::docking)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
+    this->setFixedSize(340, 220);
     tcp_process_enable = 0;
     server = new QTcpServer;
 
@@ -28,6 +30,7 @@ docking::docking(QWidget *parent) :
 
     connect(server, SIGNAL(newConnection()), this, SLOT(AcceptConn()));
     connect(ui->tcp_conn, SIGNAL(released()), ui->actionTCP, SLOT(trigger()));
+    connect(ui->actionquit, SIGNAL(triggered(bool)), this, SLOT(on_quit_released()));
 
 }
 
@@ -150,6 +153,8 @@ void docking::ReadClient(){
 void docking::on_actionTCP_triggered()
 {
     server->listen(QHostAddress::Any, 6665);
+    ui->state->setText("Waiting for connecting...");
+    ui->tcp_conn->setEnabled(false);
 }
 
 void docking::on_analyze_released()
