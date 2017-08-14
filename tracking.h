@@ -1,4 +1,4 @@
-#ifndef TRACKING_H
+﻿#ifndef TRACKING_H
 #define TRACKING_H
 
 #include <QMainWindow>
@@ -48,9 +48,12 @@ private slots:
     void on_txt_clear_triggered();
 
     void on_rece_data_triggered();
+    void on_action_txt_triggered();
+
 signals:
     void SendSignal();
 private:
+
     QPoint mouse_pos;
     rece_data rd;
     wechat_push wp;

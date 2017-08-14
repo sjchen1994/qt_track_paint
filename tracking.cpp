@@ -14,6 +14,7 @@ tracking::tracking(QWidget *parent) :
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
     this->setWindowIcon(QIcon("tracking.jpg"));
     this->setFixedSize(1875, 1000);
+
     //界面控件初始化
 
     ui->stop_stat_view1->setColumnCount(4);
@@ -411,7 +412,8 @@ void tracking::on_txt_clear_triggered()
 {
     this->on_InterfaceClear_triggered();
     dp.g_pointf.clear();
-    QFile file("D:\\project\\test\\debug\\track1.txt");
+    QString txtpath = dp.txt_path + "\\track1.txt";
+    QFile file(txtpath);
     file.open(QIODevice::WriteOnly);
     file.close();
     ui->txtclr_label->setText("清除成功");
@@ -444,5 +446,13 @@ void tracking::mouseReleaseEvent(QMouseEvent *e)
     int dx = e->globalX() - mouse_pos.x();
     int dy = e->globalY() - mouse_pos.y();
     move(x() + dx, y() + dy);
+    qDebug()<<"mouse move";
 }
 
+
+void tracking::on_action_txt_triggered()
+{
+    QString path = dp.txt_path;//获取程序当前目录
+    //path.replace("/","\\");//将地址中的"/"替换为"\"，因为在Windows下使用的是"\"。
+    QProcess::startDetached("explorer "+path);//打开上面获取的目录
+}

@@ -26,6 +26,7 @@ DataProcess::DataProcess()
 
 //--------------线程主程序--------------//
 void DataProcess::run(){
+
     this->GetPoint();
     emit Senddata(g_pointf);
     while(true){
@@ -277,7 +278,7 @@ void DataProcess::GetPoint(){
 
     while(true){
         i++;
-        g_openstr = "D:\\project\\test\\debug\\track" + QString::number(i) + ".txt";
+        g_openstr = txt_path + "\\track" + QString::number(i) + ".txt";
         QFile file(g_openstr);
         g_tmp_pointf.clear();
 

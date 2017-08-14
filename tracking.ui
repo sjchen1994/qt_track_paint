@@ -324,7 +324,7 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="ScreenShot"/>
+    <addaction name="action_txt"/>
     <addaction name="separator"/>
     <addaction name="quit"/>
    </widget>
@@ -337,6 +337,7 @@
     <addaction name="TrackConnect"/>
     <addaction name="InterfaceClear"/>
     <addaction name="txt_clear"/>
+    <addaction name="ScreenShot"/>
     <addaction name="rece_data"/>
    </widget>
    <addaction name="file"/>
@@ -393,6 +394,11 @@
    </property>
    <property name="shortcut">
     <string>Alt+G</string>
+   </property>
+  </action>
+  <action name="action_txt">
+   <property name="text">
+    <string>打开txt目录</string>
    </property>
   </action>
  </widget>

@@ -53,9 +53,11 @@ public:
     int data_clear = 0;                       //标记是否点击过清空按钮（用在点击后有新坐标加入时）（会重置）
     int ever_clear = 0;                       //标记是否曾经点击过清空按钮（不会重置）
     int quit_flag = 0;
+    QString txt_path = "D:\\project\\test\\debug";
 signals:
     void Senddata(const QVector<QVector<QPointF>> g_pointf);
 private:
+
     MyTools tools;
 };
 
