@@ -8,6 +8,7 @@ docking::docking(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
+    this->setWindowIcon(QIcon("nj.jpg"));
     this->setFixedSize(340, 220);
     tcp_process_enable = 0;
     server = new QTcpServer;
@@ -53,7 +54,7 @@ void docking::GetPoint(QString flag){
     QStringList list;
     double tmp_value;
     QString data;
-    char* return_message = "roger that";
+    QByteArray return_message = "roger that";
     QString readline_data;
     QString dir = "D:\\project\\detectFordock\\Debug\\test.exe";;
     //读取坐标

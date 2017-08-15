@@ -12,10 +12,17 @@ tracking::tracking(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
-    this->setWindowIcon(QIcon("tracking.jpg"));
+    this->setWindowIcon(QIcon("nj.jpg"));
     this->setFixedSize(1875, 1000);
 
     //界面控件初始化
+    ui->analyze_button->setIcon(QIcon("analyze_point.jpg"));
+    ui->clear_interface->setIcon(QIcon("clear1.png"));
+    ui->connect_line_button->setIcon(QIcon("connect_line.png"));
+    ui->wechat_push_button->setIcon(QIcon("wechat_push.png"));
+    ui->screenshot_button->setIcon(QIcon("screenshot.jpg"));
+    ui->window_quit->setIcon(QIcon("exit.jpg"));
+    ui->txt_clear_button->setIcon(QIcon("txt_clear"));
 
     ui->stop_stat_view1->setColumnCount(4);
     ui->stop_stat_view1->setHorizontalHeaderLabels(QStringList() << "Num" << "Std deviation" << "Avg point" << "Num of sp");

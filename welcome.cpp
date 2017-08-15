@@ -8,6 +8,7 @@ welcome::welcome(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setFixedSize(200, 150);
+    this->setWindowIcon(QIcon("nj.jpg"));
     connect(&track, SIGNAL(SendSignal()), this, SLOT(reshow()));
     connect(&dock, SIGNAL(SendSignal()), this, SLOT(reshow()));
 }
