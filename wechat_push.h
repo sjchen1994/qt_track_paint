@@ -1,7 +1,8 @@
-#ifndef WECHAT_PUSH_H
+﻿#ifndef WECHAT_PUSH_H
 #define WECHAT_PUSH_H
 #include <QThread>
 #include <QProcess>
+#include <QDir>
 class wechat_push : public QThread
 {
 public:

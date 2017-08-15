@@ -69,6 +69,9 @@ tracking::tracking(QWidget *parent) :
     connect(ui->txt_clear_button,       SIGNAL(released()),  ui->txt_clear,       SLOT(trigger()));
 
     connect(&dp, SIGNAL(Senddata(QVector<QVector<QPointF>>)), this,SLOT(ReceiveData(QVector<QVector<QPointF>>)));
+
+
+
 }
 
 //--------------构造函数--------------//
@@ -419,20 +422,30 @@ void tracking::on_txt_clear_triggered()
 {
     this->on_InterfaceClear_triggered();
     dp.g_pointf.clear();
-    QString txtpath = dp.txt_path + "\\track1.txt";
-    QFile file(txtpath);
+    QString filepath;
+    QDir dir = QDir::currentPath();
+    filepath = dir.absolutePath();
+    filepath.replace("/","\\");
+    filepath.append("\\track1.txt");
+    QFile file(filepath);
     file.open(QIODevice::WriteOnly);
     file.close();
     ui->txtclr_label->setText("清除成功");
     this->update();
     //dp.sleep(1000);
-    ui->txtclr_label->setText("清空坐标");
+    ui->txtclr_label->setText(QString::fromLocal8Bit("清空坐标"));
 }
 
 //--------------从摄像头程序获取坐标线程--------------//
 void tracking::on_rece_data_triggered()
 {
-    rd.dir = "D:\\project\\test\\Debug\\test.exe";
+    QString filepath;
+    QDir dir = QDir::currentPath();
+    filepath = dir.absolutePath();
+    filepath.replace("/","\\");
+    filepath.append("\\recedata\\test.exe");
+    rd.dir = filepath;
+
     rd.start();
 }
 
@@ -453,13 +466,14 @@ void tracking::mouseReleaseEvent(QMouseEvent *e)
     int dx = e->globalX() - mouse_pos.x();
     int dy = e->globalY() - mouse_pos.y();
     move(x() + dx, y() + dy);
-    qDebug()<<"mouse move";
 }
 
 
 void tracking::on_action_txt_triggered()
 {
-    QString path = dp.txt_path;//获取程序当前目录
-    //path.replace("/","\\");//将地址中的"/"替换为"\"，因为在Windows下使用的是"\"。
-    QProcess::startDetached("explorer "+path);//打开上面获取的目录
+    QString filepath;
+    QDir dir = QDir::currentPath();
+    filepath = dir.absolutePath();
+    filepath.replace("/","\\");
+    QProcess::startDetached("explorer "+ filepath);//打开上面获取的目录
 }

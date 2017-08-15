@@ -270,6 +270,7 @@ void DataProcess::GetPoint(){
     QVector<QPointF> g_tmp_pointf;
     QVector<double> g_tmp_angle;
     QString g_openstr;
+    QString filepath;
     QString readline_data;
     QString data="";
 
@@ -278,8 +279,14 @@ void DataProcess::GetPoint(){
 
     while(true){
         i++;
-        g_openstr = txt_path + "\\track" + QString::number(i) + ".txt";
-        QFile file(g_openstr);
+        //g_openstr = txt_path + "\\track" + QString::number(i) + ".txt";
+
+        QDir dir = QDir::currentPath();
+        filepath = dir.absolutePath();
+        filepath.replace("/","\\");
+        filepath.append("\\track1.txt");
+
+        QFile file(filepath);
         g_tmp_pointf.clear();
 
         /*if(s_pointf.size() < i){
@@ -325,6 +332,7 @@ void DataProcess::GetPoint(){
         g_pointf.clear();
         g_pointf.push_back(g_tmp_pointf);
         g_angle.push_back(g_tmp_angle);
+        break;//只考虑1的时候要
     }
 
 

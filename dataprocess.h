@@ -11,6 +11,7 @@
 #include <QMap>
 #include <QDebug>
 #include <QFile>
+#include <QDir>
 #include <QMutex>
 #include <mytools.h>
 class DataProcess : public QThread
