@@ -48,3 +48,8 @@ FORMS += \
     welcome.ui \
     docking.ui
 
+DISTFILES +=
+
+RESOURCES += \
+    resource.qrc
+

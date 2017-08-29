@@ -1,4 +1,4 @@
-#ifndef WELCOME_H
+﻿#ifndef WELCOME_H
 #define WELCOME_H
 #include <tracking.h>
 #include <docking.h>
@@ -16,8 +16,7 @@ public:
     explicit welcome(QWidget *parent = 0);
     ~welcome();
 
-    tracking track;
-    docking dock;
+
 private slots:
     void on_call_tracking_released();
 
@@ -26,6 +25,8 @@ private slots:
     void on_call_docking_released();
 
 private:
+    tracking* track;
+    docking* dock;
     Ui::welcome *ui;
 };
 

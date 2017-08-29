@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Welcome</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>tracking.jpg</normaloff>tracking.jpg</iconset>
+  </property>
   <widget class="QPushButton" name="call_tracking">
    <property name="geometry">
     <rect>

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Tracking</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>trackin.jpg</normaloff>trackin.jpg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTableWidget" name="stop_stat_view1">
     <property name="geometry">

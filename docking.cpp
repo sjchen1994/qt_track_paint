@@ -8,7 +8,6 @@ docking::docking(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setWindowFlags(Qt::WindowMinimizeButtonHint);
-    this->setWindowIcon(QIcon("nj.jpg"));
     this->setFixedSize(340, 220);
     tcp_process_enable = 0;
     server = new QTcpServer;

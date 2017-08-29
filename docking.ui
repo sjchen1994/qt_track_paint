@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>Tracking for docking</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>trackin.jpg</normaloff>trackin.jpg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="tcp_conn">
     <property name="geometry">

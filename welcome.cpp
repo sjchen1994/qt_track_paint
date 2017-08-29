@@ -8,21 +8,20 @@ welcome::welcome(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
     this->setFixedSize(200, 150);
-    this->setWindowIcon(QIcon("nj.jpg"));
-    connect(&track, SIGNAL(SendSignal()), this, SLOT(reshow()));
-    connect(&dock, SIGNAL(SendSignal()), this, SLOT(reshow()));
+
 }
 
 welcome::~welcome()
 {
-    track.quit();
     delete ui;
 }
 
 void welcome::on_call_tracking_released()
 {
     this->hide();
-    track.show();
+    track = new tracking;
+    connect(track, SIGNAL(SendSignal()), this, SLOT(reshow()));
+    track->show();
 }
 
 void welcome::reshow(){
@@ -32,5 +31,7 @@ void welcome::reshow(){
 void welcome::on_call_docking_released()
 {
     this->hide();
-    dock.show();
+    dock = new docking;
+    connect(dock, SIGNAL(SendSignal()), this, SLOT(reshow()));
+    dock->show();
 }

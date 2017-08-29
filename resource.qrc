@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/img">
+        <file alias="windowsIcon">tracking.jpg</file>
+        <file>analyze_point.jpg</file>
+        <file>clear1.png</file>
+        <file>connect_lin.png</file>
+        <file>exit.jpg</file>
+        <file>screenshot.jpg</file>
+        <file>txt_clear.jpg</file>
+        <file>wechat_push.png</file>
+    </qresource>
+</RCC>
