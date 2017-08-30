@@ -11,19 +11,19 @@ void message_output(QtMsgType type, const QMessageLogContext &context, const QSt
     QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     switch (type) {
     case QtDebugMsg:
-        in<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
+        in<<"debug"<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
         break;
           case QtInfoMsg:
-              fprintf(stderr, "Info: %s (%s:%u, %s)\n", local_msg.constData(), context.file, context.line, context.function);
+             in<<"info"<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
               break;
           case QtWarningMsg:
-              fprintf(stderr, "Warning: %s (%s:%u, %s)\n", local_msg.constData(), context.file, context.line, context.function);
+             in<<"warning"<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
               break;
           case QtCriticalMsg:
-              fprintf(stderr, "Critical: %s (%s:%u, %s)\n", local_msg.constData(), context.file, context.line, context.function);
+              in<<"critical"<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
               break;
           case QtFatalMsg:
-              fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", local_msg.constData(), context.file, context.line, context.function);
+              in<<"fatal"<<local_msg.constData()<< " " << context.file << " " << context.line << " "<< context.function<< " " <<current_date_time<<"\n";
               abort();
           }
 }

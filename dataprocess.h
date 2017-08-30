@@ -13,6 +13,8 @@
 #include <QFile>
 #include <QDir>
 #include <QMutex>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <mytools.h>
 class DataProcess : public QThread
 {
@@ -43,6 +45,7 @@ public:
 
 
 
+
     QMap<QChar,QPointF> edge_pointf;  //边缘点
     QVector<QMap<int,QVector<QPointF>>> all_stop_pointf;
     QVector<QMap<int,QVector<QPointF>>> stop_pointf;
@@ -58,8 +61,13 @@ public:
 signals:
     void Senddata(const QVector<QVector<QPointF>> g_pointf);
 private:
-
+    QTcpServer* server;
+    QTcpSocket* ClientConn;
     MyTools tools;
+private slots:
+    void AcceptConn();
+
+    void ReadClient();
 };
 
 #endif // DATAPROCESS_H

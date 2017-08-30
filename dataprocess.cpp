@@ -26,7 +26,10 @@ DataProcess::DataProcess()
 
 //--------------线程主程序--------------//
 void DataProcess::run(){
-
+    server = new QTcpServer;
+    ClientConn = new QTcpSocket;
+    connect(server, SIGNAL(newConnection()), this, SLOT(AcceptConn()));
+    server->listen(QHostAddress::Any, 6000);
     this->GetPoint();
     emit Senddata(g_pointf);
     while(true){
@@ -37,6 +40,17 @@ void DataProcess::run(){
         this->MainLoop();
     }
 }
+
+void DataProcess::AcceptConn(){
+    ClientConn = server->nextPendingConnection();
+    connect(ClientConn, SIGNAL(readyRead()), this, SLOT(ReadClient()));
+}
+
+void DataProcess::ReadClient(){
+    QString str = ClientConn->readAll();
+
+}
+
 
 
 //--------------工具函数--------------//
