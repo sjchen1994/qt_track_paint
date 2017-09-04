@@ -6,8 +6,6 @@
 
 //--------------全局变量定义--------------//
 
-//QVector<QVector<QPointF>> s_pointf;            //存储所有停止点坐标
-//QVector<QVector<QPointF>> new_s_pointf;     //用于绘制的停止点集
 QVector<QPointF> empty_show_g_sub_pointf; //用于push_back到show_g_pointf的
 QVector<QVector<double>> g_angle;                //存储所有点的角度
 QVector<int> g_size;                                      //存储对应model_id点个数
@@ -26,12 +24,12 @@ DataProcess::DataProcess()
 
 //--------------线程主程序--------------//
 void DataProcess::run(){
-    server = new QTcpServer;
+    /*server = new QTcpServer;
     ClientConn = new QTcpSocket;
     connect(server, SIGNAL(newConnection()), this, SLOT(AcceptConn()));
-    server->listen(QHostAddress::Any, 6000);
+    server->listen(QHostAddress::Any, 6000);*/ //直接与client连接 （将坐标存于内存当中）
     this->GetPoint();
-    emit Senddata(g_pointf);
+    emit Senddata(g_pointf);//先画出初始点
     while(true){
         if(this->quit_flag == 1){
             break;
@@ -41,15 +39,14 @@ void DataProcess::run(){
     }
 }
 
-void DataProcess::AcceptConn(){
+/*void DataProcess::AcceptConn(){
     ClientConn = server->nextPendingConnection();
     connect(ClientConn, SIGNAL(readyRead()), this, SLOT(ReadClient()));
 }
 
 void DataProcess::ReadClient(){
     QString str = ClientConn->readAll();
-
-}
+}*/
 
 
 
@@ -77,7 +74,7 @@ double DataProcess::GetDistanceOfPoints(const QPointF *first, const QPointF *sec
 }
 
 //点集排序函数(从小到大)
-void DataProcess::QPointfSort(QVector<QPointF> &vpf){
+void DataProcess::QPointfSort(QVector<QPointF> &vpf){//按照x坐标的大小顺序排序
     QPointF tmp_pt;
     if(vpf.empty()){
         return;
@@ -93,7 +90,7 @@ void DataProcess::QPointfSort(QVector<QPointF> &vpf){
     }
 }
 
-//点集排序函数(按照点顺序)
+//点集排序函数(按照点绝对位置距离最近为优先)
 QVector<QPointF> DataProcess::QPointfOrderSort(const QVector<QPointF> &vpf, const QString& key, const QMap<int,QVector<QPointF>> &stop_pointf){
     int t = 1;
     QPointF head_point = stop_pointf.find(key.toInt() / 10).value()[0];//作为比较的头结点
@@ -141,7 +138,7 @@ QVector<QPointF> DataProcess::QPointfOrderSort(const QVector<QPointF> &vpf, cons
     return result;
 }
 
-//点集排序函数(按照点顺序)
+//点集排序函数(按照点绝对位置距离最近为优先,用于有跳跃点的情况)
 QVector<QPointF> DataProcess::QPointfOrderSortForJumpInsert(const QVector<QPointF> &vpf, int nowid, const QMap<int,QVector<QPointF>> &stop_pointf){
     int t = 1;
 
@@ -293,7 +290,7 @@ void DataProcess::GetPoint(){
 
     while(true){
         i++;
-        //g_openstr = txt_path + "\\track" + QString::number(i) + ".txt";
+        //g_openstr = txt_path + "\\track" + QString::number(i) + ".txt"; 如果需要多个model_id的点  这一句就有用了
 
         QDir dir = QDir::currentPath();
         filepath = dir.absolutePath();
@@ -310,7 +307,7 @@ void DataProcess::GetPoint(){
             break;
         }
 
-        //普通点  读取
+        //普通点  读取  可改为通过正则表达式筛选数据
         QTextStream stream(&file);
         while(true){
             readline_data = stream.readLine(0);
@@ -346,7 +343,7 @@ void DataProcess::GetPoint(){
         g_pointf.clear();
         g_pointf.push_back(g_tmp_pointf);
         g_angle.push_back(g_tmp_angle);
-        break;//只考虑1的时候要
+        break;//只考虑1的时候要,如果有要读取多个model_id的点要去掉这一句
     }
 
 
@@ -493,7 +490,7 @@ double DataProcess::AnalyzeStopPoints(QVector<QPointF> ana_points){
 }
 
 //获得轨迹方差
-double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){
+double DataProcess::AnalyzeTrackPoints(QVector<QPointF> ana_points){//更好的，应该进行多项式拟合，目前为直线
     //先排序
     QPointfSort(ana_points);
     double sum = 0;

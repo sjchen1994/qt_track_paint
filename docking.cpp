@@ -12,6 +12,7 @@ docking::docking(QWidget *parent) :
     tcp_process_enable = 0;
     server = new QTcpServer;
 
+    //界面空间初始化
     ui->state->clear();
     ui->run->setEnabled(false);
     ui->continue_run->setEnabled(false);
@@ -132,14 +133,14 @@ void docking::on_quit_released()
     emit SendSignal();
 }
 
-void docking::AcceptConn(){
+void docking::AcceptConn(){//如果有新的client连接进来时触发
     ClientConn = server->nextPendingConnection();
     connect(ClientConn, SIGNAL(readyRead()), this, SLOT(ReadClient()));
     ui->state->setText("TCP connected!");
     ui->run->setEnabled(true);
 }
 
-void docking::ReadClient(){
+void docking::ReadClient(){//如果有数据传过来就触发
     QString str = ClientConn->readAll();
     rece_message = str;
     if(tcp_process_enable == 1){
@@ -157,7 +158,7 @@ void docking::on_actionTCP_triggered()
     ui->tcp_conn->setEnabled(false);
 }
 
-void docking::on_analyze_released()
+void docking::on_analyze_released()//显示结果
 {
     if(In_points.empty() || Out_points.empty()){
         return;
