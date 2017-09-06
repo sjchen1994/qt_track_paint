@@ -3,7 +3,7 @@
 
 int conn_line_push = 0;
 QColor v_color[7] = {Qt::black, Qt::cyan, Qt::magenta, Qt::green, Qt::yellow, Qt::blue, Qt::gray};
-QColor s_color[7] = {Qt::red, Qt::darkCyan, Qt::darkMagenta, Qt::darkGreen, Qt::darkYellow, Qt::darkBlue, Qt::darkGray};
+//QColor s_color[7] = {Qt::red, Qt::darkCyan, Qt::darkMagenta, Qt::darkGreen, Qt::darkYellow, Qt::darkBlue, Qt::darkGray};
 
 tracking::tracking(QWidget *parent) :
     QMainWindow(parent),
@@ -11,10 +11,10 @@ tracking::tracking(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::WindowStaysOnTopHint);
-    this->setWindowFlags(Qt::WindowMinimizeButtonHint);
-    this->setFixedSize(1875, 1000);
+    //this->setWindowFlags(Qt::WindowMinimizeButtonHint);
+    this->setFixedSize(1875, 1000);                           //设置窗口固定大小
 
-    //界面控件初始化
+    //界面按钮图标初始化
     ui->analyze_button->setStyleSheet("background-image: url(:/img/tracking.jpg);");
     ui->clear_interface->setStyleSheet("background-image: url(:/img/clear1.png);");
     ui->connect_line_button->setStyleSheet("background-image: url(:/img/connect_lin.png);");
@@ -23,6 +23,7 @@ tracking::tracking(QWidget *parent) :
     ui->window_quit->setStyleSheet("background-image: url(:/img/exit.jpg);");
     ui->txt_clear_button->setStyleSheet("background-image: url(:/img/txt_clear.jpg);");
 
+    //界面控件初始化
     ui->stop_stat_view1->setColumnCount(4);
     ui->stop_stat_view1->setHorizontalHeaderLabels(QStringList() << "Num" << "Std deviation" << "Avg point" << "Num of sp");
     ui->stop_stat_view1->setColumnWidth(0, 35);
@@ -58,7 +59,7 @@ tracking::tracking(QWidget *parent) :
     //数据处理线程开始
     dp.start();
 
-    //信号连接
+    //信号连接,点击按钮就相当于点击了菜单栏对应的功能
     connect(ui->screenshot_button,    SIGNAL(released()),   ui->ScreenShot,    SLOT(trigger()));
     connect(ui->connect_line_button,  SIGNAL(released()),   ui->TrackConnect, SLOT(trigger()));
     connect(ui->analyze_button,         SIGNAL(released()),  ui->TrackAnalyze,   SLOT(trigger()));
@@ -67,6 +68,7 @@ tracking::tracking(QWidget *parent) :
     connect(ui->window_quit,             SIGNAL(released()),  ui->quit,              SLOT(trigger()));
     connect(ui->txt_clear_button,       SIGNAL(released()),  ui->txt_clear,       SLOT(trigger()));
 
+    //使dataprocess线程能够传送点数据给该线程
     connect(&dp, SIGNAL(Senddata(QVector<QVector<QPointF>>)), this,SLOT(ReceiveData(QVector<QVector<QPointF>>)));
 
 
@@ -99,6 +101,7 @@ void tracking::Init(){
     pendegree.setColor(Qt::black);
     pendegree.setWidth(2);
     mypainter.setPen(pendegree);
+
     //x轴刻度
     for(int i = 0; i < 30; i++){
         mypainter.drawLine( pointx + (i + 1) * width / 30, pointy, pointx + (i + 1) * width / 30, pointy + 4);
@@ -112,20 +115,19 @@ void tracking::Init(){
 }
 
 //--------------画布事件函数--------------//
-void tracking::paintEvent(QPaintEvent*){
+void tracking::paintEvent(QPaintEvent*){//界面做了任何更改后会执行该函数，画出最新的变动，才能在界面上显示出来
     QPainter painter(this);
     painter.drawImage(0, 0, axis_image);
     painter.drawImage(60, 875, illu_image);
-
 }
 
 //--------------描点函数--------------//
-void tracking::PaintPointf(const QVector<QVector<QPointF> > &tmp_points){
+void tracking::PaintPointf(const QVector<QVector<QPointF> > &tmp_points){//将数据点描绘出来
     QPainter paintpoint(&axis_image);
     QPen pen;
     pen.setWidth(2);
     int t = 0;
-    for(QVector<QPointF> spe_id_pointf : tmp_points){
+    for(QVector<QPointF> spe_id_pointf : tmp_points){//支持不同model_id的点
         pen.setColor(v_color[t]);
         paintpoint.setPen(pen);
         paintpoint.drawPoints(spe_id_pointf);
@@ -135,7 +137,7 @@ void tracking::PaintPointf(const QVector<QVector<QPointF> > &tmp_points){
 }
 
 //--------------画箭头函数--------------//
-void tracking::MyDrawArrow(const QPointF& pt1, const QPointF& pt2, QPainter &p){
+void tracking::MyDrawArrow(const QPointF& pt1, const QPointF& pt2, QPainter &p){//用一个带箭头的线连接pt1和pt2
 
     p.drawLine(pt1,pt2);
     double x1 = pt2.x() - 5 * cos(atan2(pt2.y() - pt1.y(), pt2.x() - pt1.x()) - 0.4);
@@ -158,7 +160,7 @@ void tracking::ReceiveData(const QVector<QVector<QPointF> > g_pointf){//接受�
 }
 
 //--------------截图按钮事件--------------//
-void tracking::on_ScreenShot_triggered()
+void tracking::on_ScreenShot_triggered()//抓取当前界面图像并保存
 {
     QPixmap save_image = QPixmap::grabWidget(this);
     save_image.save("ScreenShot.png","png");
@@ -171,11 +173,13 @@ void tracking::quit(){
 //--------------退出按钮事件--------------//
 void tracking::on_quit_triggered()
 {
+    //结束所有子线程
     rd.ProTeminal();
     wp.ProTeminal();
     dp.quit_flag = 1;
 
     dp.wait(100);
+    //传送信号，调用父线程槽函数，返回父窗口
     emit SendSignal();
     //dp.terminate();//停止数据处理线程
 
@@ -186,7 +190,7 @@ void tracking::on_quit_triggered()
 //--------------微信按钮事件--------------//
 void tracking::on_WechatPush_triggered()
 {
-    wp.start();
+    wp.start();//打开微信线程
 }
 
 //--------------数据分析按钮事件--------------//
@@ -194,7 +198,7 @@ void tracking::on_TrackAnalyze_triggered()
 {
     //分析计算函数
     if(dp.g_pointf.first().empty()){
-        return;
+        return;//如果要分析的点是空的，则返回
     }
     dp.AnalyzePoints();
     //-----------------------分析点坐标集合  输出分析结果-------------------//
@@ -204,7 +208,7 @@ void tracking::on_TrackAnalyze_triggered()
      * 3:画出示意图
      * 4:得到停止点的平均点
     */
-    //1
+    //1 stop_stat_view1 窗口数据加载
     auto ana_it = dp.last_stop_pointf.begin();
     int current_rowcount;
     for(; ana_it != dp.last_stop_pointf.end(); ana_it++){
@@ -217,7 +221,7 @@ void tracking::on_TrackAnalyze_triggered()
         }
     }
 
-    //2
+    //2  track_stat_view1 窗口数据加载
     for(auto ana_tra_it = dp.track_pointf.begin(); ana_tra_it != dp.track_pointf.end(); ana_tra_it++,ana_it++){
         for(auto it_tra = ana_tra_it->begin(); it_tra != ana_tra_it->end(); it_tra++){
             current_rowcount = ui->track_stat_view1->rowCount();
@@ -326,7 +330,7 @@ void tracking::on_TrackConnect_triggered()
         this->update();
         conn_line_push = 1;
     }
-    else{
+    else{//重新绘制当前画面，等同于取消连线
         axis_image = QImage(1250 * 1.5, 500 * 1.5, QImage::Format_RGB32);
         QColor backColor = qRgb(255, 255, 255);
         axis_image.fill(backColor);
@@ -373,7 +377,7 @@ void tracking::on_TrackConnect_triggered()
 }
 
 //--------------清除界面按钮事件--------------//
-void tracking::on_InterfaceClear_triggered()
+void tracking::on_InterfaceClear_triggered()//重绘
 {
     dp.clear_pushed = 1;
     dp.ever_clear = 1;
@@ -383,30 +387,9 @@ void tracking::on_InterfaceClear_triggered()
     QColor backColor = qRgb(255, 255, 255);
     axis_image.fill(backColor);
     illu_image.fill(backColor);
-    QPainter mypainter(&axis_image);
-    int point0x = 61, point0y = 727.5;//坐标轴原点
-    int pointx = 25.5, pointy = 79.77;
-    int width = 1811.25,height = 712.5;//坐标轴宽度，高度
-    mypainter.drawRect(5,5,1250 * 1.5-10, 500 * 1.5-10);//外围矩形
-    //y
-    mypainter.drawLine(point0x, point0y - height, point0x, point0y);
-    //x
-    mypainter.drawLine(pointx, pointy, pointx + width, pointy);
 
-    QPen pendegree;
-    pendegree.setColor(Qt::black);
-    pendegree.setWidth(2);
-    mypainter.setPen(pendegree);
-    //x轴刻度
-    for(int i = 0; i < 30; i++){
-        mypainter.drawLine(pointx + (i + 1) * width / 30, pointy, pointx + (i + 1) * width / 30, pointy + 4);
-        mypainter.drawText(pointx+(i + 0.65) * width / 30, pointy + 13, QString::number(-100 + (i + 1) * 170));
-    }
-    //y轴刻度
-    for(int i = 0; i < 20; i++){
-        mypainter.drawLine(point0x, point0y - i * height / 20, point0x + 4, point0y - i * height / 20);
-        mypainter.drawText(point0x - 22, point0y - (i - 0.15) * height / 20, QString::number(2000 - i * 110));
-    }
+    this->Init();
+
     ui->stop_stat_view1->setRowCount(0);
     ui->track_stat_view1->setRowCount(0);
     ui->stop_stat_view1->clearContents();
@@ -417,9 +400,9 @@ void tracking::on_InterfaceClear_triggered()
 }
 
 //--------------数据存储清除事件--------------//
-void tracking::on_txt_clear_triggered()
+void tracking::on_txt_clear_triggered()///
 {
-    this->on_InterfaceClear_triggered();
+    this->on_InterfaceClear_triggered();//将txt文件清空
     dp.g_pointf.clear();
     QString filepath;
     QDir dir = QDir::currentPath();
@@ -438,7 +421,7 @@ void tracking::on_txt_clear_triggered()
 //--------------从摄像头程序获取坐标线程--------------//
 void tracking::on_rece_data_triggered()
 {
-    QString filepath;
+    QString filepath;          //打开获取坐标server程序
     QDir dir = QDir::currentPath();
     filepath = dir.absolutePath();
     filepath.replace("/","\\");
@@ -449,6 +432,7 @@ void tracking::on_rece_data_triggered()
 }
 
 //--------------移动窗口事件--------------//
+//窗口的任何一个点都可以用来拖动窗口
 void tracking::mousePressEvent(QMouseEvent *e)
 {
     mouse_pos = e->globalPos();
@@ -467,7 +451,7 @@ void tracking::mouseReleaseEvent(QMouseEvent *e)
     move(x() + dx, y() + dy);
 }
 
-
+//打开txt目录
 void tracking::on_action_txt_triggered()
 {
     QString filepath;

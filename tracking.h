@@ -50,6 +50,8 @@ private slots:
     void on_rece_data_triggered();
     void on_action_txt_triggered();
 
+    void on_analyze_button_released();
+
 signals:
     void SendSignal();
 private:
